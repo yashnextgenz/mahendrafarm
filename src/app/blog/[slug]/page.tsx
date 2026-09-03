@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { Button } from "@/components/site/Button";
 import { BlogCard } from "@/components/site/BlogCard";
 import { Reveal } from "@/components/site/Reveal";
+import { ReadingProgress } from "@/components/site/ReadingProgress";
 import { Calendar, Clock, ArrowLeft, ArrowRight, Leaf, Tag } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -118,6 +119,7 @@ export default async function BlogDetailPage({ params }: { params: Params }) {
 
   return (
     <article className="bg-cream">
+      <ReadingProgress />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

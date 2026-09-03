@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { PageHero } from "@/components/site/PageHero";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { BlogCard } from "@/components/site/BlogCard";
+import { BlogExplorer } from "@/components/site/BlogExplorer";
 import { Reveal } from "@/components/site/Reveal";
 import { Button } from "@/components/site/Button";
 import { BLOG_HERO_IMAGE } from "@/data/site";
@@ -35,7 +36,18 @@ export default async function BlogPage() {
   });
 
   const featured = posts.filter((p) => p.featured).slice(0, 1)[0] ?? posts[0];
-  const rest = posts.filter((p) => p.id !== featured?.id);
+  const explorerPosts = posts
+    .filter((p) => p.id !== featured?.id)
+    .map((p) => ({
+      slug: p.slug,
+      title: p.title,
+      excerpt: p.excerpt,
+      category: p.category,
+      coverImage: p.coverImage,
+      author: p.author,
+      readMinutes: p.readMinutes,
+      createdAt: p.createdAt,
+    }));
 
   return (
     <>
@@ -101,36 +113,17 @@ export default async function BlogPage() {
         </section>
       )}
 
-      {/* All posts grid */}
+      {/* All posts with search + filter */}
       <section className="bg-white py-20 sm:py-24" aria-label="All articles">
         <div className="container-page">
           <SectionHeading
             eyebrow="Latest Articles"
             title="Fresh From The Farm Journal"
-            subtitle="Browse our latest stories on natural farming, seasonal produce, distributors and farm life."
+            subtitle="Search or filter our stories on natural farming, seasonal produce, distributors and farm life."
           />
-          {rest.length === 0 ? (
-            <p className="mt-10 text-center text-ink/60">No articles published yet. Please check back soon.</p>
-          ) : (
-            <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {rest.map((post, i) => (
-                <Reveal key={post.id} delay={(i % 3) * 90}>
-                  <BlogCard
-                    post={{
-                      slug: post.slug,
-                      title: post.title,
-                      excerpt: post.excerpt,
-                      category: post.category,
-                      coverImage: post.coverImage,
-                      author: post.author,
-                      readMinutes: post.readMinutes,
-                      createdAt: post.createdAt,
-                    }}
-                  />
-                </Reveal>
-              ))}
-            </div>
-          )}
+          <div className="mt-10">
+            <BlogExplorer posts={explorerPosts} />
+          </div>
 
           {/* Newsletter CTA */}
           <div className="mt-16 rounded-3xl bg-forest p-8 text-center text-white sm:p-12">

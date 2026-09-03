@@ -99,3 +99,37 @@ Stage Summary:
 - Page count is now 6 top-level routes: `/`, `/about`, `/farming-activities`, `/products`, `/gallery`, `/blog` (plus dynamic `/blog/[slug]`). The original 5 required routes are unchanged.
 - Unresolved / risks: none blocking. Blog content is seeded (not editable via UI yet). The 4 older models (User, Post from the scaffold) are unused — could be cleaned up in a future round.
 - Next-phase priorities (for round 4): add a category filter + search to the blog listing, build a lightweight admin route (token-protected) to view ContactEnquiries + Subscribers and toggle enquiry status, add Next.js `placeholder="blur"` with generated blurDataURLs for the local images, add an OG image generation route (`opengraph-image.tsx`) for social sharing, add a "Recent enquiries" count badge somewhere, and consider a dedicated `/distributor` route split out of `/gallery`.
+
+---
+Task ID: 4
+Agent: main (Z.ai Code) — recurring webDevReview round 4
+Task: QA the existing site, then add more features & styling (mandatory). Focus: blog search/filter, token-protected admin dashboard, dynamic OG images, reading progress bar.
+
+Work Log:
+- Read worklog.md (rounds 1–3) and confirmed the site was stable: all 9 routes (incl. /blog + /blog/[slug] + sitemap + robots) return 200, lint clean, no console errors, mobile 390px no overflow.
+- QA via agent-browser at round start: re-confirmed all routes 200, zero console errors, mobile 390px scrollWidth === 390. No bugs to fix — proceeded to new feature work.
+- **Added blog search + category filter** to the `/blog` listing:
+  - New client component `BlogExplorer` (`src/components/site/BlogExplorer.tsx`): a search input (with clear button) + category filter pills with per-category counts (auto-hides empty categories). Filters posts client-side by title/excerpt/category. Shows a live results count ("Showing N articles in [category] for "[query]"") and an empty-state card with a "Clear Filters" button.
+  - Refactored `src/app/blog/page.tsx` to map DB posts into plain data and pass to `<BlogExplorer>`. The featured post split-card remains above the explorer.
+  - Verified via agent-browser: typing "dairy" filters to matching articles; clicking the DAIRY category pill shows only the dairy article; clearing the search restores all; counts render (ALL 5, DAIRY 1, VEGETABLES 1, POULTRY 1, DISTRIBUTOR NETWORK 1).
+- **Added a token-protected admin dashboard** at `/admin`:
+  - New `src/app/admin/page.tsx` (client component): a login screen (lock icon, password-type token input, "Unlock Dashboard" button, dev token hint) that gates the dashboard. Token is auto-restored from `?token=` query param and persisted to the URL on login so refreshes keep you authed.
+  - The dashboard shows 4 stat cards (Total Enquiries, New Enquiries, Subscribers, Active Subs) fetched in parallel from `/api/contact`, `/api/contact/list`, and `/api/newsletter`, plus a enquiries table with name/email/phone/date, interest pill, message preview, a status `<select>` (new/read/responded/closed, color-coded), and a delete button (with confirm).
+  - New `GET /api/contact/list` route (token-guarded) returning the latest 200 enquiries.
+  - New `PATCH /api/contact/[id]` route (token-guarded) to update status, and `DELETE /api/contact/[id]` to remove an enquiry.
+  - Token guard: `process.env.ADMIN_TOKEN` with dev fallback `farm-admin-2025`. Verified: wrong token returns 401; correct token returns the list; changing a status in the UI PATCHes the API and the change persists in the DB (confirmed "Priya QA" → `responded` via curl after the UI click).
+  - Verified visually via VLM: all 4 stat cards render with correct numbers (Total 2, New 2, Subs 1, Active 1) and the enquiries table with dropdowns + delete actions.
+- **Added dynamic OpenGraph image generation** for blog posts:
+  - New `src/app/blog/[slug]/opengraph-image.tsx` using `next/og` `ImageResponse`. Renders a 1200×630 brand image (green gradient, leaf avatar, MAHINDRA INTEGRATED FARM branding + tagline, category pill, large article title, excerpt, footer URL). Uses Node.js runtime (not edge) so the SQLite Prisma client works — initially tried `runtime="edge"` which silently fell back to default title because edge can't run the SQLite client; switching to `runtime="nodejs"` fixed it.
+  - Verified: the route returns `image/png` 200, and VLM confirms the actual article title "Why Natural Farming Matters More Than Ever" renders (not the default fallback). Next.js auto-wires this into the blog detail page's `<meta property="og:image">`.
+- **Added a reading progress bar** to the blog detail page:
+  - New `ReadingProgress` client component (`src/components/site/ReadingProgress.tsx`): a thin fixed gradient bar at the top of the viewport that tracks scroll progress through the page. Mounted at the top of the blog detail `<article>`.
+  - Verified: after scrolling down the blog detail page, the bar width updates to ~23.57% (matches scroll position).
+- Final QA: `bun run lint` clean; all 10 routes 200 (`/`, `/about`, `/farming-activities`, `/products`, `/gallery`, `/blog`, `/blog/[slug]`, `/admin`, `/sitemap.xml`, `/robots.txt`); `/api/contact/list` returns 401 for wrong token + 200 for correct; blog search + filter work; admin status update persists to DB; OG image generates with the correct title; reading progress bar updates on scroll; mobile 390px scrollWidth === 390 on both /blog and /admin (the admin table scrolls horizontally within its container, not the page).
+
+Stage Summary:
+- Round 4 added 4 substantive features: (1) blog search + category filter with counts and empty state; (2) a token-protected admin dashboard with stats, enquiry status management, and delete — backed by 3 new API routes (`/api/contact/list`, `/api/contact/[id]` PATCH+DELETE); (3) dynamic OpenGraph image generation for blog posts via `next/og` (nodejs runtime for Prisma compatibility); (4) a reading progress bar on blog detail pages.
+- New artifacts: `src/components/site/{BlogExplorer,ReadingProgress}.tsx`, `src/app/admin/page.tsx`, `src/app/api/contact/list/route.ts`, `src/app/api/contact/[id]/route.ts`, `src/app/blog/[slug]/opengraph-image.tsx`; refactored `src/app/blog/page.tsx` (uses BlogExplorer), added ReadingProgress to `src/app/blog/[slug]/page.tsx`.
+- Page count is now 7 top-level routes: `/`, `/about`, `/farming-activities`, `/products`, `/gallery`, `/blog`, `/admin` (plus dynamic `/blog/[slug]` and `opengraph-image`). The original 5 required routes are unchanged and intact.
+- Unresolved / risks: none blocking. The admin token uses an env var with a dev fallback — for production, set a strong `ADMIN_TOKEN` env var and consider upgrading to NextAuth. The OG image uses `runtime="nodejs"` (slightly slower than edge but required for the SQLite Prisma client).
+- Next-phase priorities (for round 5): add a blog category index page (`/blog/category/[cat]`), add a sticky table-of-contents on blog detail for long articles, add a "Related products" section on blog detail, add lazy blur placeholders (`placeholder="blur"` with generated blurDataURLs) for the local images, add a cookie-consent banner, add a dark-mode toggle, and build a `/distributor` dedicated route split out of `/gallery`.
