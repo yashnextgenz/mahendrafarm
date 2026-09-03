@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { BackToTop } from "@/components/site/BackToTop";
+import { CookieConsent } from "@/components/site/CookieConsent";
+import { ThemeProvider } from "@/components/site/ThemeProvider";
 import { SITE } from "@/data/site";
 
 const poppins = Poppins({
@@ -114,13 +116,16 @@ export default function RootLayout({
       <body
         className={`${poppins.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
-        <div className="flex min-h-screen flex-col">
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </div>
-        <BackToTop />
-        <Toaster />
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+          <div className="flex min-h-screen flex-col">
+            <Navbar />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </div>
+          <BackToTop />
+          <CookieConsent />
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -133,3 +133,43 @@ Stage Summary:
 - Page count is now 7 top-level routes: `/`, `/about`, `/farming-activities`, `/products`, `/gallery`, `/blog`, `/admin` (plus dynamic `/blog/[slug]` and `opengraph-image`). The original 5 required routes are unchanged and intact.
 - Unresolved / risks: none blocking. The admin token uses an env var with a dev fallback — for production, set a strong `ADMIN_TOKEN` env var and consider upgrading to NextAuth. The OG image uses `runtime="nodejs"` (slightly slower than edge but required for the SQLite Prisma client).
 - Next-phase priorities (for round 5): add a blog category index page (`/blog/category/[cat]`), add a sticky table-of-contents on blog detail for long articles, add a "Related products" section on blog detail, add lazy blur placeholders (`placeholder="blur"` with generated blurDataURLs) for the local images, add a cookie-consent banner, add a dark-mode toggle, and build a `/distributor` dedicated route split out of `/gallery`.
+
+---
+Task ID: 5
+Agent: main (Z.ai Code) — recurring webDevReview round 5
+Task: QA the existing site, then add more features & styling (mandatory). Focus: dedicated /distributor route, sticky blog TOC, cookie consent, dark-mode toggle.
+
+Work Log:
+- Read worklog.md (rounds 1–4) and confirmed the site was stable: all 10 routes 200, lint clean, no console errors, mobile 390px no overflow.
+- QA via agent-browser at round start: re-confirmed all routes 200, zero console errors, mobile 390px scrollWidth === 390. No bugs to fix — proceeded to new feature work.
+- **Added a dedicated `/distributor` route** (split out of `/gallery`):
+  - New `src/app/distributor/page.tsx` with 7 sections: PageHero, Why Partner (benefits cards), 3-Step Process, What You Receive (4 starter-kit cards: Product Catalog / Pricing & Margins / Branding Kit / Logistics Support), Regions We Serve (location pills + image), Distributor Stories (3 testimonials), dark-green FAQ (reusing FAQSection + DISTRIBUTOR_FAQS), and a final light-green CTA.
+  - Added 3 new data exports to `site.ts`: `DISTRIBUTOR_KIT` (4 items with icon names), `DISTRIBUTOR_REGIONS` (8 Tamil Nadu regions), `DISTRIBUTOR_TESTIMONIALS` (3 partner quotes).
+  - Updated `NAV_LINKS` to replace the "Distributor Network" anchor (`/gallery#distributor`) with a real "Distributor" link to `/distributor`.
+  - Updated the gallery distributor section CTA to link to the new `/distributor` page ("View Distributor Program").
+  - Added `/distributor` to `sitemap.ts`.
+  - Verified via VLM: all sections render (hero, starter kit with 4 named cards, FAQ, etc.); DOM check confirms all 7 sections present.
+- **Added a sticky table-of-contents** to the blog detail page:
+  - New `TableOfContents` client component (`src/components/site/TableOfContents.tsx`): uses IntersectionObserver to highlight the heading currently in view; clicking an item smooth-scrolls to it (respects reduced motion); hidden below `xl` breakpoint to keep mobile/tablet clean.
+  - Refactored the blog detail's `renderContent` to slugify `## ` / `# ` headings into stable DOM ids and return `{nodes, toc}`. The body now uses a `xl:grid-cols-[1fr_16rem]` layout with the article on the left and the sticky TOC `<aside>` on the right.
+  - Verified: TOC shows 3 items ("Healthier food, healthier families", "Soil that lasts generations", "A small choice, a large impact"); clicking an item scrolls the matching heading into view (top ≈ 95.5px, just below the navbar).
+- **Added a cookie-consent banner**:
+  - New `CookieConsent` client component (`src/components/site/CookieConsent.tsx`): a fixed bottom card with cookie icon, message, "Accept All" + "Essential Only" buttons, and a dismiss X. Persists the choice to `localStorage` (`mif-cookie-consent`). Uses a lazy initial state (`readHasConsent()`) to avoid `setState`-in-effect lint errors and a `setTimeout` to reveal the banner 1.2s after mount (non-intrusive). Only shows if no choice is recorded.
+  - Added `fadeInUp` keyframe to `globals.css`.
+  - Mounted globally in `layout.tsx`.
+  - Verified: clearing localStorage + reloading shows the banner after 1.2s; clicking "Accept All" dismisses it and stores "accepted"; the banner stays gone on reload.
+- **Added a dark-mode toggle** using `next-themes`:
+  - New `ThemeProvider` (`src/components/site/ThemeProvider.tsx`) wrapping the app in `layout.tsx` with `attribute="class"`, `defaultTheme="light"`, `enableSystem`, `disableTransitionOnChange`.
+  - New `ThemeToggle` client component (`src/components/site/ThemeToggle.tsx`) with Sun/Moon icons and a hydration-safe mount guard (uses `queueMicrotask` to flip mounted state outside of an effect, avoiding the `setState`-in-effect lint rule).
+  - Added brand-token dark overrides in `globals.css` `.dark` block (forest → light-green, darkgreen → near-black, mediumgreen → lime, lightgreen → medium-green, cream → dark-green, ink → pale-green) so the brand utility classes (bg-cream, text-forest, etc.) respond to dark mode.
+  - Added the toggle to the Navbar (both desktop and mobile layouts) next to the phone CTA / hamburger.
+  - Verified: clicking the toggle adds `class="dark"` to `<html>` and changes the body background to `rgb(15, 61, 27)` (dark green); VLM confirms a deep forest-green dark mode with good contrast.
+- **Styling polish:** added `fadeInUp`/`fadeIn` keyframes and line-clamp helper classes to globals.css; the distributor page uses Reveal animations throughout for consistent scroll-reveal behavior with the rest of the site.
+- Final QA: `bun run lint` clean; all 12 routes 200 (`/`, `/about`, `/farming-activities`, `/products`, `/gallery`, `/blog`, `/blog/[slug]`, `/distributor`, `/admin`, `/admin?token=...`, `/sitemap.xml`, `/robots.txt`); distributor page renders all 7 sections; blog detail TOC builds from headings and scrolls on click; cookie consent persists to localStorage; dark mode toggle applies the `.dark` class and visually flips the palette; mobile 390px scrollWidth === 390 on both `/distributor` and `/blog/[slug]`.
+
+Stage Summary:
+- Round 5 added 4 substantive features: (1) a dedicated `/distributor` page with 7 rich sections (benefits, process, starter kit, regions, testimonials, FAQ, CTA) plus 3 new data exports; (2) a sticky IntersectionObserver-powered table-of-contents on blog detail (auto-built from `##` headings, xl+ sidebar); (3) a localStorage-persisted cookie-consent banner with Accept/Essential choices; (4) a next-themes dark-mode toggle wired into the navbar with brand-token dark overrides.
+- New artifacts: `src/app/distributor/page.tsx`, `src/components/site/{TableOfContents,CookieConsent,ThemeProvider,ThemeToggle}.tsx`; updated `src/app/layout.tsx` (ThemeProvider + CookieConsent), `src/components/site/Navbar.tsx` (ThemeToggle), `src/app/blog/[slug]/page.tsx` (TOC sidebar + id'd headings), `src/app/gallery/page.tsx` (distributor CTA → /distributor), `src/data/site.ts` (NAV_LINKS, DISTRIBUTOR_KIT/REGIONS/TESTIMONIALS), `src/app/sitemap.ts` (+distributor), `src/app/globals.css` (dark brand overrides + keyframes + line-clamp).
+- Page count is now 8 top-level routes: `/`, `/about`, `/farming-activities`, `/products`, `/gallery`, `/blog`, `/distributor`, `/admin` (plus dynamic `/blog/[slug]` + `opengraph-image`). The original 5 required routes are unchanged and intact.
+- Unresolved / risks: none blocking. Dark mode works for surfaces using the brand tokens, but a handful of hardcoded color usages (e.g. literal `bg-white` on some cards) won't fully invert — a future round could audit those for a perfect dark experience. The cookie consent is a preference record only (no analytics wiring yet).
+- Next-phase priorities (for round 6): audit hardcoded `bg-white`/`text-forest` etc. for full dark-mode coverage, wire the cookie consent choice to actually gate (future) analytics, add a `/blog/category/[cat]` index page, add a "Related products" section on blog detail, add Next.js blur placeholders for the local images, add a print stylesheet for blog articles, and consider a `/_not-found` custom 404 page.

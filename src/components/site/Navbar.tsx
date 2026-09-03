@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Menu, X, Phone, Leaf } from "lucide-react";
 import { NAV_LINKS, SITE } from "@/data/site";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "./ThemeToggle";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -89,25 +90,31 @@ export function Navbar() {
           })}
         </ul>
 
-        {/* Desktop phone CTA */}
-        <a
-          href={`tel:${SITE.phoneRaw}`}
-          className="hidden items-center gap-2 rounded-full bg-forest px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-300 hover:bg-darkgreen hover:shadow-md sm:flex"
-        >
-          <Phone className="h-4 w-4" strokeWidth={2.2} />
-          <span className="tabular-nums tracking-wide">{SITE.phone}</span>
-        </a>
+        {/* Desktop theme toggle + phone CTA */}
+        <div className="hidden items-center gap-2 sm:flex">
+          <ThemeToggle className="h-9 w-9 ring-1 ring-mediumgreen/20 hover:ring-mediumgreen/40" />
+          <a
+            href={`tel:${SITE.phoneRaw}`}
+            className="hidden items-center gap-2 rounded-full bg-forest px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-300 hover:bg-darkgreen hover:shadow-md md:flex"
+          >
+            <Phone className="h-4 w-4" strokeWidth={2.2} />
+            <span className="tabular-nums tracking-wide">{SITE.phone}</span>
+          </a>
+        </div>
 
         {/* Mobile toggle */}
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full text-forest transition-colors hover:bg-lightgreen lg:hidden"
-          aria-label={open ? "Close menu" : "Open menu"}
-          aria-expanded={open}
-        >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        <div className="flex items-center gap-1.5 lg:hidden">
+          <ThemeToggle className="h-9 w-9 ring-1 ring-mediumgreen/20 hover:ring-mediumgreen/40" />
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full text-forest transition-colors hover:bg-lightgreen"
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+          >
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
       </nav>
 
       {/* Mobile menu */}

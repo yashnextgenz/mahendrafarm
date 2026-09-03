@@ -7,6 +7,7 @@ import { Button } from "@/components/site/Button";
 import { BlogCard } from "@/components/site/BlogCard";
 import { Reveal } from "@/components/site/Reveal";
 import { ReadingProgress } from "@/components/site/ReadingProgress";
+import { TableOfContents, type TocItem } from "@/components/site/TableOfContents";
 import { Calendar, Clock, ArrowLeft, ArrowRight, Leaf, Tag } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -54,22 +55,41 @@ function formatDate(d: Date) {
   });
 }
 
-// Very small markdown-ish renderer: ## headings, paragraphs, lists handled as paragraphs.
-function renderContent(content: string) {
+// Slugify a heading into a stable DOM id for anchor + TOC.
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
+
+type RenderedContent = { nodes: React.ReactNode; toc: TocItem[] };
+
+// Very small markdown-ish renderer: ## headings, paragraphs. Builds a TOC from ## headings.
+function renderContent(content: string): RenderedContent {
   const blocks = content.trim().split(/\n\n+/);
-  return blocks.map((block, i) => {
+  const toc: TocItem[] = [];
+  const nodes = blocks.map((block, i) => {
     const trimmed = block.trim();
     if (trimmed.startsWith("## ")) {
+      const text = trimmed.replace(/^##\s+/, "");
+      const id = slugify(text);
+      toc.push({ id, text });
       return (
-        <h2 key={i} className="mt-8 text-xl font-bold text-forest sm:text-2xl">
-          {trimmed.replace(/^##\s+/, "")}
+        <h2 key={i} id={id} className="mt-8 scroll-mt-24 text-xl font-bold text-forest sm:text-2xl">
+          {text}
         </h2>
       );
     }
     if (trimmed.startsWith("# ")) {
+      const text = trimmed.replace(/^#\s+/, "");
+      const id = slugify(text);
+      toc.push({ id, text });
       return (
-        <h1 key={i} className="mt-8 text-2xl font-extrabold text-forest sm:text-3xl">
-          {trimmed.replace(/^#\s+/, "")}
+        <h1 key={i} id={id} className="mt-8 scroll-mt-24 text-2xl font-extrabold text-forest sm:text-3xl">
+          {text}
         </h1>
       );
     }
@@ -79,6 +99,7 @@ function renderContent(content: string) {
       </p>
     );
   });
+  return { nodes, toc };
 }
 
 export default async function BlogDetailPage({ params }: { params: Params }) {
@@ -116,6 +137,9 @@ export default async function BlogDetailPage({ params }: { params: Params }) {
     publisher: { "@type": "Organization", name: "Mahindra Integrated Farm" },
     articleSection: post.category,
   };
+
+  // Render article body once (extracts TOC items from headings).
+  const { nodes: renderedBody, toc } = renderContent(post.content);
 
   return (
     <article className="bg-cream">
@@ -173,31 +197,41 @@ export default async function BlogDetailPage({ params }: { params: Params }) {
 
       {/* Body */}
       <div className="container-page py-14 sm:py-16">
-        <div className="mx-auto max-w-3xl">
-          <div className="rounded-3xl bg-white p-6 shadow-soft ring-1 ring-black/5 sm:p-10">
-            {renderContent(post.content)}
-          </div>
+        <div className="mx-auto max-w-5xl">
+          <div className="grid grid-cols-1 gap-8 xl:grid-cols-[1fr_16rem]">
+            {/* Article + author */}
+            <div className="min-w-0">
+              <div className="rounded-3xl bg-white p-6 shadow-soft ring-1 ring-black/5 sm:p-10">
+                {renderedBody}
+              </div>
 
-          {/* Share / author card */}
-          <div className="mt-8 flex flex-col items-start justify-between gap-4 rounded-3xl bg-forest p-6 text-white sm:flex-row sm:items-center">
-            <div className="flex items-center gap-3">
-              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-lightgreen text-forest">
-                <Leaf className="h-6 w-6" />
-              </span>
-              <div>
-                <p className="text-sm font-bold">{post.author}</p>
-                <p className="text-xs text-cream/70">Mahindra Integrated Farm</p>
+              {/* Share / author card */}
+              <div className="mt-8 flex flex-col items-start justify-between gap-4 rounded-3xl bg-forest p-6 text-white sm:flex-row sm:items-center">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-full bg-lightgreen text-forest">
+                    <Leaf className="h-6 w-6" />
+                  </span>
+                  <div>
+                    <p className="text-sm font-bold">{post.author}</p>
+                    <p className="text-xs text-cream/70">Mahindra Integrated Farm</p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button href="/blog" variant="light" size="md">
+                    <ArrowLeft className="h-4 w-4" />
+                    All Articles
+                  </Button>
+                  <Button href="/gallery#contact" variant="primary" size="md" withArrow>
+                    Talk To Us
+                  </Button>
+                </div>
               </div>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Button href="/blog" variant="light" size="md">
-                <ArrowLeft className="h-4 w-4" />
-                All Articles
-              </Button>
-              <Button href="/gallery#contact" variant="primary" size="md" withArrow>
-                Talk To Us
-              </Button>
-            </div>
+
+            {/* Sticky TOC sidebar (xl+) */}
+            <aside className="min-w-0">
+              <TableOfContents items={toc} />
+            </aside>
           </div>
         </div>
       </div>

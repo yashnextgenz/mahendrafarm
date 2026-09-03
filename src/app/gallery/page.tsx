@@ -120,12 +120,14 @@ export default function GalleryPage() {
                 Ready to grow with us?
               </p>
               <p className="mt-1 text-sm text-ink/70">
-                Fill the form below or call us directly — we&apos;ll take it from there.
+                See our full distributor program or fill the form below — we&apos;ll take it from there.
               </p>
             </div>
-            <Button href="#contact" variant="primary" size="lg" withArrow className="shrink-0">
-              Become A Distributor
-            </Button>
+            <div className="flex flex-col items-center gap-2 sm:flex-row sm:shrink-0">
+              <Button href="/distributor" variant="primary" size="lg" withArrow className="shrink-0">
+                View Distributor Program
+              </Button>
+            </div>
           </div>
 
           {/* FAQ */}

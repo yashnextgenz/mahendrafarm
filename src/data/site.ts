@@ -34,7 +34,7 @@ export const NAV_LINKS: NavItem[] = [
   { label: "Products", href: "/products" },
   { label: "Gallery", href: "/gallery" },
   { label: "Blog", href: "/blog" },
-  { label: "Distributor Network", href: "/gallery#distributor" },
+  { label: "Distributor", href: "/distributor" },
   { label: "Contact Us", href: "/gallery#contact" },
 ];
 
@@ -475,5 +475,63 @@ export const DISTRIBUTOR_FAQS: FAQ[] = [
   {
     q: "Can I start small and scale up later?",
     a: "Absolutely. Many of our current partners began with a single product line and expanded over a few months. We grow with you — your order size and product mix can evolve as your customer base grows.",
+  },
+];
+
+export const DISTRIBUTOR_KIT = [
+  {
+    title: "Product Catalog",
+    description: "Full range of fresh produce, dairy, poultry, pulses and plantation products with seasonal availability.",
+    icon: "Package",
+  },
+  {
+    title: "Pricing & Margins",
+    description: "Transparent, agreed-upfront margins per product category — locked for the term of your agreement.",
+    icon: "TrendingUp",
+  },
+  {
+    title: "Branding Kit",
+    description: "Shelf-ready signage, product photography, brand story sheet and seasonal marketing highlights.",
+    icon: "Palette",
+  },
+  {
+    title: "Logistics Support",
+    description: "Scheduled dispatch from the farm, cold-chain guidance for dairy, and packing standards.",
+    icon: "Truck",
+  },
+];
+
+export const DISTRIBUTOR_REGIONS = [
+  "Trichy",
+  "Salem",
+  "Madurai",
+  "Coimbatore",
+  "Chennai",
+  "Pudukkottai",
+  "Tiruchirappalli District",
+  "Perambalur",
+];
+
+export const DISTRIBUTOR_TESTIMONIALS = [
+  {
+    quote:
+      "I started with just vegetables six months ago. Now I supply dairy and plantation products too — my margins have doubled and my customers trust the brand.",
+    name: "Priya Subramanian",
+    role: "Distributor, Salem",
+    initials: "PS",
+  },
+  {
+    quote:
+      "The supply is consistent, the quality is honest, and the team responds within a day. That's rare in this trade.",
+    name: "Anand Krishnan",
+    role: "Retail Partner, Madurai",
+    initials: "AK",
+  },
+  {
+    quote:
+      "What I appreciate most is the transparency. No surprise price changes, no last-minute stock issues. A genuine partnership.",
+    name: "Suresh Kumar",
+    role: "Restaurant Supplier, Trichy",
+    initials: "SK",
   },
 ];
