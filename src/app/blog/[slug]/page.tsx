@@ -9,6 +9,7 @@ import { ProductCard } from "@/components/site/ProductCard";
 import { Reveal } from "@/components/site/Reveal";
 import { ReadingProgress } from "@/components/site/ReadingProgress";
 import { PrintButton } from "@/components/site/PrintButton";
+import { ShareButtons } from "@/components/site/ShareButtons";
 import { TableOfContents, type TocItem } from "@/components/site/TableOfContents";
 import { PRODUCTS } from "@/data/site";
 import { Calendar, Clock, ArrowLeft, ArrowRight, Leaf, Tag } from "lucide-react";
@@ -209,17 +210,20 @@ export default async function BlogDetailPage({ params }: { params: Params }) {
               </div>
 
               {/* Share / author card */}
-              <div className="mt-8 flex flex-col items-start justify-between gap-4 rounded-3xl bg-forest p-6 text-white sm:flex-row sm:items-center">
-                <div className="flex items-center gap-3">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-full bg-lightgreen text-forest">
-                    <Leaf className="h-6 w-6" />
-                  </span>
-                  <div>
-                    <p className="text-sm font-bold">{post.author}</p>
-                    <p className="text-xs text-cream/70">Mahindra Integrated Farm</p>
+              <div className="mt-8 rounded-3xl bg-forest p-6 text-white sm:p-7">
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-11 w-11 items-center justify-center rounded-full bg-lightgreen text-forest">
+                      <Leaf className="h-6 w-6" />
+                    </span>
+                    <div>
+                      <p className="text-sm font-bold">{post.author}</p>
+                      <p className="text-xs text-cream/70">Mahindra Integrated Farm</p>
+                    </div>
                   </div>
+                  <ShareButtons title={post.title} />
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="mt-5 flex flex-wrap gap-2 border-t border-white/10 pt-5">
                   <Button href="/blog" variant="light" size="md">
                     <ArrowLeft className="h-4 w-4" />
                     All Articles

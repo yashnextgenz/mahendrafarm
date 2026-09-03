@@ -190,6 +190,31 @@ export default async function BlogPage() {
                     Search all articles
                   </Link>
                 </div>
+
+                {/* Popular tags cloud */}
+                <div className="mt-5 border-t border-border pt-4">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-ink/40">
+                    Browse by category
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {[...new Set(posts.map((p) => p.category))].map((cat) => {
+                      const slug = cat
+                        .toLowerCase()
+                        .replace(/[^a-z0-9\s-]/g, "")
+                        .trim()
+                        .replace(/\s+/g, "-");
+                      return (
+                        <Link
+                          key={cat}
+                          href={`/blog/category/${slug}`}
+                          className="rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-forest ring-1 ring-mediumgreen/20 transition-colors hover:bg-forest hover:text-white"
+                        >
+                          {cat}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             </aside>
           </div>

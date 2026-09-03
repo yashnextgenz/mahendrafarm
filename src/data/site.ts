@@ -35,6 +35,7 @@ export const NAV_LINKS: NavItem[] = [
   { label: "Gallery", href: "/gallery" },
   { label: "Blog", href: "/blog" },
   { label: "Distributor", href: "/distributor" },
+  { label: "FAQ", href: "/faq" },
   { label: "Contact Us", href: "/gallery#contact" },
 ];
 
@@ -533,5 +534,32 @@ export const DISTRIBUTOR_TESTIMONIALS = [
     name: "Suresh Kumar",
     role: "Restaurant Supplier, Trichy",
     initials: "SK",
+  },
+];
+
+export const GENERAL_FAQS: FAQ[] = [
+  {
+    q: "Are your products genuinely chemical-free?",
+    a: "Yes. We follow natural farming practices across all our activities — no synthetic pesticides or chemical fertilisers. Our vegetables are harvested at the right time, our milk comes from grass-fed cows, and our eggs come from free-roaming hens. You can taste and see the difference.",
+  },
+  {
+    q: "How fresh are the products when they reach me?",
+    a: "Very. Vegetables are harvested to order, milk is cooled and dispatched the same day, and eggs are collected daily. Depending on your location, stock typically reaches you within 24–48 hours of leaving the farm.",
+  },
+  {
+    q: "Can I visit the farm before ordering?",
+    a: "We welcome genuine enquiries. If you're a prospective distributor, a restaurant buyer, or a regular household customer who wants to see our practices first-hand, reach out and we'll arrange a visit by appointment.",
+  },
+  {
+    q: "Do you deliver outside Tamil Nadu?",
+    a: "Our direct delivery network is strongest across Tamil Nadu. For orders further afield, we work through our distributor partners and trusted logistics — please contact us with your location and we'll let you know what's possible.",
+  },
+  {
+    q: "What is the minimum order for home delivery?",
+    a: "There is no strict minimum for local household orders, though a small basket helps us keep delivery sustainable. For specific products like dairy or flowers, ask us and we'll confirm the practical minimum for your area.",
+  },
+  {
+    q: "How do I pay for my order?",
+    a: "We accept UPI, bank transfer and cash on delivery (for established customers in served regions). Your distributor or our team will share the exact payment details when you place an order.",
   },
 ];

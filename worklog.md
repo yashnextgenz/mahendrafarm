@@ -249,3 +249,35 @@ Stage Summary:
 - Page count is now 10 top-level routes: `/`, `/about`, `/farming-activities`, `/products`, `/gallery`, `/blog`, `/distributor`, `/search`, `/privacy`, `/admin` (plus dynamic `/blog/[slug]`, `/blog/category/[cat]`, `opengraph-image`, `not-found`, loading states). The original 5 required routes are unchanged and intact.
 - Unresolved / risks: none blocking. The search API does a Prisma `contains` query (case-insensitive on SQLite) — for a larger post count, consider adding full-text search or pre-indexing. Loading skeletons only appear during actual server delays (fast in dev).
 - Next-phase priorities (for round 8): add Next.js blur placeholders for the local images (`placeholder="blur"` with generated blurDataURLs), add a custom `error.tsx` boundary, add a "popular tags" cloud on the blog, add a reading-time progress + share buttons (social) on blog detail, add a `/faq` dedicated page consolidating all FAQs, add a sitemap-style HTML "site index" page, and consider wiring the cookie-consent choice to actually gate analytics.
+
+---
+Task ID: 8
+Agent: main (Z.ai Code) — recurring webDevReview round 8
+Task: QA the existing site, then add more features & styling (mandatory). Focus: custom error boundary, social share buttons, dedicated /faq page, popular tags cloud.
+
+Work Log:
+- Read worklog.md (rounds 1–7) and confirmed the site was stable: all 15 tested routes 200 (1 intentional 404), lint clean, no console errors, mobile 390px no overflow.
+- QA via agent-browser at round start: re-confirmed all routes 200, zero console errors, mobile 390px scrollWidth === 390. No bugs to fix — proceeded to new feature work.
+- **Added a custom `error.tsx` boundary:**
+  - New `src/app/error.tsx` (client component) — branded green design with an AlertTriangle icon, "Something Went Wrong" heading, a friendly explanation, the error `digest` (ref) in a mono pill, a "Try Again" button (calls `reset()`) + "Back To Home" button, and a "read our latest stories" link. Logs the error to the console via `useEffect`. Decorative blurred green blobs match the 404 page styling.
+  - This catches any uncaught error in any route segment and gives users a recoverable, on-brand experience instead of a raw error.
+- **Added social share buttons** to the blog detail page:
+  - New `ShareButtons` client component (`src/components/site/ShareButtons.tsx`) — 4 buttons: WhatsApp, Facebook, X (Twitter), and Copy Link (with a 2.5s "Copied!" confirmation). Uses `window.open` with share URLs built from the current `window.location.href` (so it works after client routing). Copy uses `navigator.clipboard.writeText` with a graceful fallback.
+  - Wired into the blog detail author/action card (which was restructured: author + share on top row, action buttons on a divided bottom row). The card now shows the leaf avatar + author, the share buttons, and below a divider the "All Articles" / "Print" / "Talk To Us" buttons.
+  - Verified: 4 share buttons render (`Share on WhatsApp`, `Share on Facebook`, `Share on X (Twitter)`, `Copy link`); clicking Copy shows the "Copied!" confirmation.
+- **Added a dedicated `/faq` page** consolidating all FAQs:
+  - New `GENERAL_FAQS` data export in `site.ts` (6 honest Q&As: chemical-free, freshness, farm visits, delivery area, minimum order, payment methods).
+  - New `src/app/faq/page.tsx` with 4 sections: PageHero, General Questions (light-themed accordion using a `LightFAQSection` helper), Distributor Questions (dark-green section reusing the existing `FAQSection` + `DISTRIBUTOR_FAQS`), and a "Still Have Questions" CTA card with Contact + Become a Distributor buttons.
+  - Added "FAQ" to the global navbar (`NAV_LINKS`) and to `sitemap.ts`.
+  - Verified: hero, General Questions (light accordion), Distributor Questions (dark accordion), and the CTA section all render (4 sections confirmed via aria-labels); VLM confirmed the structure.
+- **Added a "Browse by category" tags cloud** to the blog listing sidebar:
+  - Below the Popular Reads list in the sticky sidebar, a tags cloud linking to each unique blog category (derived from the posts list). Renders as small pills that link to `/blog/category/[slug]`.
+  - Verified: 6 category links in the sidebar.
+- Final QA: `bun run lint` clean; all 16 tested routes return correct status (200 for valid, 404 for invalid); error boundary file compiles and is ready to catch errors; share buttons (4) render and Copy link shows "Copied!"; FAQ page renders 4 sections with light + dark accordions; tags cloud shows 6 category links; mobile 390px scrollWidth === 390 on /faq and blog detail; sitemap now has 22 URLs (including /faq, /search, /privacy).
+
+Stage Summary:
+- Round 8 added 4 substantive features: (1) a custom `error.tsx` boundary with a branded, recoverable error UI (Try Again + Home + error digest); (2) social share buttons (WhatsApp, Facebook, X, Copy Link with confirmation) on the blog detail author card; (3) a dedicated `/faq` page consolidating 6 new general FAQs + 6 distributor FAQs in light + dark accordion sections, with a "Still Have Questions" CTA — added to navbar + sitemap; (4) a "Browse by category" tags cloud on the blog listing sidebar.
+- New artifacts: `src/app/error.tsx`, `src/components/site/ShareButtons.tsx`, `src/app/faq/page.tsx`; updated `src/data/site.ts` (NAV_LINKS + FAQ, GENERAL_FAQS), `src/app/blog/[slug]/page.tsx` (ShareButtons + restructured action card), `src/app/blog/page.tsx` (tags cloud), `src/app/sitemap.ts` (+faq).
+- Page count is now 11 top-level routes: `/`, `/about`, `/farming-activities`, `/products`, `/gallery`, `/blog`, `/distributor`, `/search`, `/privacy`, `/faq`, `/admin` (plus dynamic `/blog/[slug]`, `/blog/category/[cat]`, `opengraph-image`, `not-found`, `error`, loading states). The original 5 required routes are unchanged and intact.
+- Unresolved / risks: none blocking. The error boundary only triggers on uncaught errors (none currently). The share buttons use `window.open` popups — most browsers allow these from a user click, which is the case here.
+- Next-phase priorities (for round 9): add Next.js blur placeholders for the local images, add a dedicated `/sitemap` HTML site-index page, add a reading-time estimate badge to the blog hero, add a "back to top" within the blog TOC, add structured BreadcrumbList JSON-LD to blog + category pages, add a cookie preferences re-open button in the footer, and consider a `/team` or `/careers` page.
