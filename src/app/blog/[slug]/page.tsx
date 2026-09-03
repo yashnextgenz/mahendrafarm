@@ -5,9 +5,12 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { Button } from "@/components/site/Button";
 import { BlogCard } from "@/components/site/BlogCard";
+import { ProductCard } from "@/components/site/ProductCard";
 import { Reveal } from "@/components/site/Reveal";
 import { ReadingProgress } from "@/components/site/ReadingProgress";
+import { PrintButton } from "@/components/site/PrintButton";
 import { TableOfContents, type TocItem } from "@/components/site/TableOfContents";
+import { PRODUCTS } from "@/data/site";
 import { Calendar, Clock, ArrowLeft, ArrowRight, Leaf, Tag } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -221,6 +224,7 @@ export default async function BlogDetailPage({ params }: { params: Params }) {
                     <ArrowLeft className="h-4 w-4" />
                     All Articles
                   </Button>
+                  <PrintButton />
                   <Button href="/gallery#contact" variant="primary" size="md" withArrow>
                     Talk To Us
                   </Button>
@@ -235,6 +239,49 @@ export default async function BlogDetailPage({ params }: { params: Params }) {
           </div>
         </div>
       </div>
+
+      {/* Related products */}
+      {(() => {
+        // Map a blog category to relevant product categories, fall back to all.
+        const categoryToProducts: Record<string, string[]> = {
+          Dairy: ["Dairy"],
+          Vegetables: ["Vegetables"],
+          Poultry: ["Poultry"],
+          "Farming Practices": ["Vegetables", "Dairy", "Poultry"],
+          Sustainability: ["Vegetables", "Plantation"],
+          "Distributor Network": ["Vegetables", "Dairy", "Pulses", "Plantation"],
+        };
+        const cats = categoryToProducts[post.category] ?? [];
+        const relatedProducts = cats.length
+          ? PRODUCTS.filter((p) => cats.includes(p.category)).slice(0, 4)
+          : PRODUCTS.slice(0, 4);
+        if (relatedProducts.length === 0) return null;
+        return (
+          <section className="bg-cream py-16 sm:py-20" aria-label="Related products">
+            <div className="container-page">
+              <Reveal>
+                <div className="flex flex-col items-center text-center">
+                  <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-mediumgreen">
+                    <Leaf className="h-3.5 w-3.5" />
+                    Try From Our Farm
+                  </span>
+                  <h2 className="mt-3 text-2xl font-extrabold uppercase tracking-tight text-forest sm:text-3xl">
+                    Related Products
+                  </h2>
+                  <span className="mt-2 h-1 w-16 rounded-full bg-mediumgreen" />
+                </div>
+              </Reveal>
+              <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                {relatedProducts.map((p, i) => (
+                  <Reveal key={p.name} delay={(i % 4) * 80}>
+                    <ProductCard product={p} />
+                  </Reveal>
+                ))}
+              </div>
+            </div>
+          </section>
+        );
+      })()}
 
       {/* Related posts */}
       {related.length > 0 && (

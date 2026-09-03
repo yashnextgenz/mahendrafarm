@@ -116,6 +116,38 @@
   --color-ink: #EAF3D6;
 }
 
+/* Dark-mode overrides for hardcoded utility classes used across components.
+   This gives broad dark-mode coverage without editing every component file. */
+.dark .bg-white {
+  background-color: #164D24 !important;
+  color: #F5F9E9;
+}
+.dark .bg-cream {
+  background-color: #0F3D1B !important;
+}
+.dark .bg-lightgreen {
+  background-color: #2F7D32 !important;
+  color: #DFF0C8;
+}
+.dark .ring-black\/5 {
+  --tw-ring-color: rgba(223, 240, 200, 0.12) !important;
+}
+.dark .border-border {
+  border-color: #1A5C30 !important;
+}
+.dark .text-ink\/70,
+.dark .text-ink\/60,
+.dark .text-ink\/50,
+.dark .text-ink\/80,
+.dark .text-ink\/40,
+.dark .text-ink\/85 {
+  color: #EAF3D6 !important;
+  opacity: 0.85;
+}
+.dark .text-forest {
+  color: #DFF0C8 !important;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -208,4 +240,77 @@
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Print styles — primarily for blog articles */
+@media print {
+  /* Hide navigation, footer, floating elements and interactive chrome */
+  header[role="banner"],
+  nav,
+  footer,
+  .fixed,
+  [aria-label="Table of contents"],
+  [aria-label="Reading progress"],
+  [data-print-hide],
+  button[aria-label="Back to top"],
+  button[aria-label="Switch to light mode"],
+  button[aria-label="Switch to dark mode"] {
+    display: none !important;
+  }
+
+  /* Reset backgrounds to white and text to black for ink efficiency */
+  html, body {
+    background: #ffffff !important;
+    color: #17351d !important;
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+
+  /* Use the full page width */
+  .container-page {
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Ensure images don't break across pages */
+  img, figure {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Headings keep with their following content */
+  h1, h2, h3 {
+    page-break-after: avoid;
+    break-after: avoid;
+    color: #164d24 !important;
+  }
+
+  /* Articles flow without rounded card chrome */
+  article {
+    background: #ffffff !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Links show their URL in parentheses for printed reference */
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #2f7d32;
+    word-break: break-all;
+  }
+
+  /* Avoid orphaned headings at the bottom of a page */
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* Force backgrounds on cover images to be white */
+  .bg-cream, .bg-lightgreen, .bg-forest, .bg-darkgreen {
+    background: #ffffff !important;
+  }
 }

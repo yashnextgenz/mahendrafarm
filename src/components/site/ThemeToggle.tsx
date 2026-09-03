@@ -1,18 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 import { Sun, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+// useSyncExternalStore lets us read a client-only value (whether we're mounted
+// on the client) without triggering the "setState in render/effect" lint rule
+// and without any hydration mismatch — the server snapshot is always `false`.
+const subscribe = (cb: () => void) => {
+  // We only need to "subscribe" to nothing; the store flips to true on first client read.
+  // Use a microtask so the change is observed after mount.
+  const t = setTimeout(cb, 0);
+  return () => clearTimeout(t);
+};
+const getSnapshot = () => true; // client
+const getServerSnapshot = () => false; // server
+
 export function ThemeToggle({ className }: { className?: string }) {
   const { resolvedTheme, setTheme } = useTheme();
-  // Start mounted=true if we know we're on the server; flip after first
-  // client effect to avoid hydration mismatch on the icon.
-  const [mounted, setMounted] = useState(false);
-  if (typeof window !== "undefined" && !mounted) {
-    queueMicrotask(() => setMounted(true));
-  }
+  const mounted = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const isDark = resolvedTheme === "dark";
 
@@ -34,10 +41,9 @@ export function ThemeToggle({ className }: { className?: string }) {
           <Moon className="h-5 w-5" />
         )
       ) : (
-        // Placeholder to reserve space until mounted
+        // Placeholder to reserve space until mounted on the client
         <span className="h-5 w-5" />
       )}
     </button>
   );
 }
-

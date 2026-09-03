@@ -173,3 +173,41 @@ Stage Summary:
 - Page count is now 8 top-level routes: `/`, `/about`, `/farming-activities`, `/products`, `/gallery`, `/blog`, `/distributor`, `/admin` (plus dynamic `/blog/[slug]` + `opengraph-image`). The original 5 required routes are unchanged and intact.
 - Unresolved / risks: none blocking. Dark mode works for surfaces using the brand tokens, but a handful of hardcoded color usages (e.g. literal `bg-white` on some cards) won't fully invert — a future round could audit those for a perfect dark experience. The cookie consent is a preference record only (no analytics wiring yet).
 - Next-phase priorities (for round 6): audit hardcoded `bg-white`/`text-forest` etc. for full dark-mode coverage, wire the cookie consent choice to actually gate (future) analytics, add a `/blog/category/[cat]` index page, add a "Related products" section on blog detail, add Next.js blur placeholders for the local images, add a print stylesheet for blog articles, and consider a `/_not-found` custom 404 page.
+
+---
+Task ID: 6
+Agent: main (Z.ai Code) — recurring webDevReview round 6
+Task: QA the existing site, then add more features & styling (mandatory). Focus: blog category pages, related products on blog detail, custom 404, print styles, dark-mode audit, and bug fixes found during QA.
+
+Work Log:
+- Read worklog.md (rounds 1–5) and confirmed the site was stable: all 12 routes 200, lint clean, mobile 390px no overflow.
+- QA via agent-browser at round start: discovered two real bugs:
+  - **Bug 1 (console error):** `ThemeToggle` used `queueMicrotask(() => setMounted(true))` during render, producing the React error "Can't perform a React state update on a component that hasn't mounted yet". Replaced with `useSyncExternalStore` (the React-recommended way to read client-only state without hydration mismatch or setState-in-render) — server snapshot is always `false`, client snapshot flips to `true` after mount. Verified: no more console errors on home or /about.
+  - **Bug 2 (500 errors):** Added an `onClick={(e) => e.stopPropagation()}` to the category `<Link>` inside `BlogCard`, but BlogCard is a server component — Next.js throws "Event handlers cannot be passed to Client Component props". Removed the onClick (the category link is a separate anchor, so stopPropagation isn't needed). Separately, the new print button on the blog detail page had the same issue, so extracted it into a `PrintButton` client component. Verified: /, /blog, /blog/[slug], /blog/category/[cat] all return 200 after the fixes.
+- **Added `/blog/category/[cat]` index pages:**
+  - New `src/app/blog/category/[cat]/page.tsx` with `generateStaticParams` (6 known category slugs) + `generateMetadata` (per-category title/description/OpenGraph). Renders a PageHero, a breadcrumb "All Articles" back link + count, the posts grid (BlogCard), and an "Explore Other Categories" pill section linking to all 6 categories.
+  - Category slugs ↔ display names mapped: sustainability, farming-practices, dairy, vegetables, poultry, distributor-network. Unknown slugs call `notFound()` → the custom 404.
+  - Updated `BlogCard` so the category pill is now a link to `/blog/category/[slug]` (with a leaf icon); restructured the card footer (date left, Read More right).
+  - Added all 6 category URLs to `sitemap.ts`.
+  - Verified: `/blog/category/dairy` shows "Dairy Articles" hero, "1 article in this category", the article card, and the Explore Other Categories pills (VLM-confirmed); invalid category → 404.
+- **Added a "Related Products" section** to the blog detail page:
+  - Maps the post's category to relevant product categories (Dairy→Dairy, Vegetables→Vegetables, Poultry→Poultry, Farming Practices→mixed, Sustainability→Vegetables+Plantation, Distributor Network→mixed), falls back to first 4 products. Renders up to 4 ProductCards in a cream section between the article body and the Related Articles.
+  - Verified: the section exists in the DOM and VLM confirms it shows product cards (Fresh Vegetables, badges, Enquire Now buttons).
+- **Added a custom 404 page** (`src/app/not-found.tsx`):
+  - Branded green design: leaf icon, large "404", "This Page Took A Different Path" heading, "Back To Home" + "Read The Blog" buttons, and a "Or call us at 97895 40045" phone link. Decorative blurred green blobs in the background.
+  - Verified: `/this-page-does-not-exist` → 404 with all 5 elements (VLM-confirmed); `/blog/category/invalid-cat` → 404.
+- **Added print styles + a print button:**
+  - Added a `@media print` block to `globals.css`: hides nav/footer/floating elements/TOC, resets backgrounds to white and text to dark green for ink efficiency, forces full-width containers, avoids page-breaks inside images/headings, and appends the URL after external links for printed reference.
+  - New `PrintButton` client component (`src/components/site/PrintButton.tsx`) with a Printer icon and `data-print-hide` so it's hidden in print. Wired into the blog detail author/action bar.
+  - Verified: the Print button renders on the blog detail page (`button[data-print-hide]` present).
+- **Dark-mode coverage audit:**
+  - Added dark-mode CSS overrides in `globals.css` for hardcoded utility classes: `.dark .bg-white` → dark green card background, `.dark .bg-cream` → dark-green page background, `.dark .bg-lightgreen` → medium green, `.dark .text-ink/*` → pale-green at 0.85 opacity, `.dark .text-forest` → light-green, `.dark .ring-black/5` → light ring color, `.dark .border-border` → dark border. This gives broad dark-mode coverage without editing every component file.
+  - Verified via VLM: in dark mode the blog article cards now show dark green backgrounds with light text (previously they stayed white). The featured card, product cards, and other `bg-white` surfaces now invert correctly.
+- Final QA: `bun run lint` clean; all 17 tested routes return correct status (200 for valid, 404 for invalid); the two QA-discovered bugs are fixed (no console errors, no 500s); blog category pages render with hero + count + cards + category pills; blog detail has related products + print button + TOC; 404 page is branded; print styles applied; dark mode now covers card surfaces; mobile 390px scrollWidth === 390 on category + 404 pages; sitemap includes all 6 category URLs.
+
+Stage Summary:
+- Round 6 added 4 substantive features and fixed 2 bugs: (1) blog category index pages (`/blog/category/[cat]`) with 6 pre-rendered categories + SEO metadata + sitemap entries, and BlogCard category pills now link to them; (2) a "Related Products" section on blog detail mapping post categories to relevant products; (3) a branded custom 404 page; (4) print styles for blog articles + a PrintButton client component. Bug fixes: ThemeToggle's setState-in-render console error (→ useSyncExternalStore) and BlogCard/print-button onClick in server components causing 500s (→ removed onClick, extracted PrintButton client component). Dark-mode coverage improved via CSS overrides for hardcoded `bg-white`/`bg-cream`/`text-ink`/`text-forest` utilities.
+- New artifacts: `src/app/blog/category/[cat]/page.tsx`, `src/app/not-found.tsx`, `src/components/site/PrintButton.tsx`; updated `src/components/site/BlogCard.tsx` (category link, restructured footer), `src/components/site/ThemeToggle.tsx` (useSyncExternalStore), `src/app/blog/[slug]/page.tsx` (related products + PrintButton), `src/app/globals.css` (print styles + dark overrides), `src/app/sitemap.ts` (+6 category URLs).
+- Page count is now 8 top-level routes + dynamic category + dynamic blog slug + opengraph-image + not-found. The original 5 required routes are unchanged and intact.
+- Unresolved / risks: none blocking. The dev server process was killed by the sandbox mid-round (background process limitation); I restarted it with a subshell `(bun run dev ... &)` for testing. The next reviewer should verify the dev server is up before testing.
+- Next-phase priorities (for round 7): wire cookie-consent choice to gate analytics, add Next.js blur placeholders for the local images, add a `/search` route for site-wide search, add a "popular posts" / "trending" sidebar to the blog, add a privacy policy page, add a loading.tsx for the blog + admin routes, and consider a custom error.tsx boundary.
