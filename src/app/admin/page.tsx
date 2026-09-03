@@ -16,6 +16,7 @@ import {
   Inbox,
   Leaf,
   ArrowRight,
+  Briefcase,
 } from "lucide-react";
 
 type Enquiry = {
@@ -29,7 +30,7 @@ type Enquiry = {
   createdAt: string;
 };
 
-type Stats = { total: number; new: number; subscribers: number; activeSubs: number };
+type Stats = { total: number; new: number; subscribers: number; activeSubs: number; applications: number };
 
 const STATUS_OPTIONS = ["new", "read", "responded", "closed"] as const;
 type Status = (typeof STATUS_OPTIONS)[number];
@@ -39,6 +40,28 @@ const STATUS_STYLES: Record<Status, string> = {
   read: "bg-blue-100 text-blue-700 ring-blue-200",
   responded: "bg-amber-100 text-amber-700 ring-amber-200",
   closed: "bg-gray-200 text-gray-600 ring-gray-300",
+};
+
+type Application = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  jobId: string;
+  message: string;
+  status: string;
+  createdAt: string;
+};
+
+const APP_STATUS_OPTIONS = ["new", "reviewing", "interviewed", "hired", "rejected"] as const;
+type AppStatus = (typeof APP_STATUS_OPTIONS)[number];
+
+const APP_STATUS_STYLES: Record<AppStatus, string> = {
+  new: "bg-mediumgreen/15 text-mediumgreen ring-mediumgreen/30",
+  reviewing: "bg-blue-100 text-blue-700 ring-blue-200",
+  interviewed: "bg-amber-100 text-amber-700 ring-amber-200",
+  hired: "bg-forest/15 text-forest ring-forest/30",
+  rejected: "bg-gray-200 text-gray-600 ring-gray-300",
 };
 
 function formatDate(d: string) {
@@ -55,6 +78,7 @@ export default function AdminPage() {
   const [token, setToken] = useState("");
   const [authed, setAuthed] = useState(false);
   const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
+  const [applications, setApplications] = useState<Application[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -75,10 +99,11 @@ export default function AdminPage() {
     setError(null);
     try {
       const qs = `?token=${encodeURIComponent(t)}`;
-      const [enqRes, contactRes, subRes] = await Promise.all([
+      const [enqRes, contactRes, subRes, appRes] = await Promise.all([
         fetch(`/api/contact/list${qs}`, { cache: "no-store" }),
         fetch(`/api/contact`, { cache: "no-store" }),
         fetch(`/api/newsletter`, { cache: "no-store" }),
+        fetch(`/api/applications${qs}`, { cache: "no-store" }),
       ]);
       if (enqRes.status === 401) {
         setAuthed(false);
@@ -88,12 +113,15 @@ export default function AdminPage() {
       const enqData = (await enqRes.json()) as { ok?: boolean; enquiries?: Enquiry[] };
       const contactData = (await contactRes.json()) as { ok?: boolean; total?: number; new?: number };
       const subData = (await subRes.json()) as { ok?: boolean; total?: number; active?: number };
+      const appData = (await appRes.json().catch(() => ({}))) as { ok?: boolean; applications?: Application[] };
       setEnquiries(enqData.enquiries ?? []);
+      setApplications(appData.applications ?? []);
       setStats({
         total: contactData.total ?? 0,
         new: contactData.new ?? 0,
         subscribers: subData.total ?? 0,
         activeSubs: subData.active ?? 0,
+        applications: appData.applications?.length ?? 0,
       });
     } catch {
       setError("Network error while loading data.");
@@ -145,6 +173,41 @@ export default function AdminPage() {
       });
       if (res.ok) {
         setEnquiries((prev) => prev.filter((e) => e.id !== id));
+      }
+    } catch {
+      setError("Network error while deleting.");
+    }
+  };
+
+  const updateAppStatus = async (id: string, status: AppStatus) => {
+    setUpdatingId(id);
+    try {
+      const res = await fetch(`/api/applications/${id}?token=${encodeURIComponent(token)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+      if (res.ok && data.ok) {
+        setApplications((prev) => prev.map((a) => (a.id === id ? { ...a, status } : a)));
+      } else {
+        setError(data.error ?? "Could not update application.");
+      }
+    } catch {
+      setError("Network error while updating.");
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const deleteApplication = async (id: string) => {
+    if (!confirm("Delete this application permanently?")) return;
+    try {
+      const res = await fetch(`/api/applications/${id}?token=${encodeURIComponent(token)}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setApplications((prev) => prev.filter((a) => a.id !== id));
       }
     } catch {
       setError("Network error while deleting.");
@@ -244,11 +307,12 @@ export default function AdminPage() {
         )}
 
         {/* Stat cards */}
-        <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-5">
           <StatCard Icon={Inbox} label="Total Enquiries" value={stats?.total ?? "—"} tint="bg-mediumgreen/15 text-mediumgreen" />
           <StatCard Icon={Clock} label="New Enquiries" value={stats?.new ?? "—"} tint="bg-amber-100 text-amber-700" />
           <StatCard Icon={Users} label="Subscribers" value={stats?.subscribers ?? "—"} tint="bg-blue-100 text-blue-700" />
           <StatCard Icon={CheckCircle2} label="Active Subs" value={stats?.activeSubs ?? "—"} tint="bg-forest/10 text-forest" />
+          <StatCard Icon={Briefcase} label="Job Applications" value={stats?.applications ?? "—"} tint="bg-purple-100 text-purple-700" />
         </div>
 
         {/* Enquiries table */}
@@ -327,6 +391,96 @@ export default function AdminPage() {
                             onClick={() => void deleteEnquiry(e.id)}
                             disabled={updatingId === e.id}
                             aria-label="Delete enquiry"
+                            className="inline-flex h-7 w-7 items-center justify-center rounded-full text-red-500 transition-colors hover:bg-red-50"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Job applications table */}
+        <div className="mt-8 rounded-3xl bg-white p-5 shadow-soft ring-1 ring-black/5 sm:p-7">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold text-forest">
+              Job Applications
+              <span className="ml-2 text-sm font-medium text-ink/50">({applications.length})</span>
+            </h2>
+          </div>
+
+          {loading && applications.length === 0 ? (
+            <div className="flex items-center justify-center py-16 text-ink/50">
+              <Loader2 className="h-6 w-6 animate-spin" />
+              <span className="ml-2 text-sm">Loading applications…</span>
+            </div>
+          ) : applications.length === 0 ? (
+            <div className="py-16 text-center">
+              <Briefcase className="mx-auto h-10 w-10 text-ink/30" />
+              <p className="mt-3 text-sm text-ink/60">No job applications yet.</p>
+            </div>
+          ) : (
+            <div className="mt-5 -mx-5 overflow-x-auto sm:mx-0">
+              <div className="min-w-[40rem] px-5 sm:px-0">
+                <div className="grid grid-cols-12 gap-3 border-b border-border pb-2 text-[11px] font-bold uppercase tracking-wide text-ink/50">
+                  <div className="col-span-4">Applicant</div>
+                  <div className="col-span-3">Position</div>
+                  <div className="col-span-3">Note</div>
+                  <div className="col-span-2 text-right">Status / Action</div>
+                </div>
+                <ul className="divide-y divide-border">
+                  {applications.map((a) => (
+                    <li key={a.id} className="grid grid-cols-12 gap-3 py-4 text-sm">
+                      <div className="col-span-4">
+                        <p className="font-bold text-forest">{a.name}</p>
+                        <p className="mt-0.5 flex items-center gap-1 text-xs text-ink/60">
+                          <Mail className="h-3 w-3" />
+                          <span className="break-all">{a.email}</span>
+                        </p>
+                        <p className="mt-0.5 flex items-center gap-1 text-xs text-ink/60">
+                          <Phone className="h-3 w-3" />
+                          <span className="tabular-nums">{a.phone}</span>
+                        </p>
+                        <p className="mt-0.5 text-[11px] text-ink/40">{formatDate(a.createdAt)}</p>
+                      </div>
+                      <div className="col-span-3">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-lightgreen px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-forest">
+                          <Briefcase className="h-3 w-3" />
+                          {a.jobId}
+                        </span>
+                      </div>
+                      <div className="col-span-3">
+                        <p className="text-xs leading-relaxed text-ink/70 line-clamp-3">
+                          {a.message}
+                        </p>
+                      </div>
+                      <div className="col-span-2">
+                        <div className="flex flex-col items-end gap-2">
+                          <select
+                            value={a.status}
+                            disabled={updatingId === a.id}
+                            onChange={(ev) => updateAppStatus(a.id, ev.target.value as AppStatus)}
+                            className={cn(
+                              "rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wide ring-1 outline-none transition-colors",
+                              APP_STATUS_STYLES[a.status as AppStatus] ?? APP_STATUS_STYLES.new
+                            )}
+                          >
+                            {APP_STATUS_OPTIONS.map((s) => (
+                              <option key={s} value={s}>
+                                {s}
+                              </option>
+                            ))}
+                          </select>
+                          <button
+                            type="button"
+                            onClick={() => void deleteApplication(a.id)}
+                            disabled={updatingId === a.id}
+                            aria-label="Delete application"
                             className="inline-flex h-7 w-7 items-center justify-center rounded-full text-red-500 transition-colors hover:bg-red-50"
                           >
                             <Trash2 className="h-3.5 w-3.5" />

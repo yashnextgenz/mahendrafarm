@@ -54,11 +54,32 @@ export function JobApplicationForm({
     setServerError(null);
     if (!validate()) return;
     setStatus("loading");
-    // Simulate async submission (no backend wired for job applications yet)
-    await new Promise((r) => setTimeout(r, 900));
-    setStatus("success");
-    setValues({ ...EMPTY, jobId: preselectedJobId ?? "" });
-    setTimeout(() => setStatus("idle"), 6000);
+    try {
+      const res = await fetch("/api/applications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+        errors?: Record<string, string>;
+      };
+      if (res.ok && data.ok) {
+        setStatus("success");
+        setValues({ ...EMPTY, jobId: preselectedJobId ?? "" });
+        setTimeout(() => setStatus("idle"), 6000);
+      } else if (data.errors) {
+        setErrors(data.errors as Partial<FormState>);
+        setStatus("idle");
+      } else {
+        setStatus("error");
+        setServerError(data.error ?? "Something went wrong. Please try again.");
+      }
+    } catch {
+      setStatus("error");
+      setServerError("Network error. Please check your connection and try again.");
+    }
   };
 
   const inputClass = (field: keyof FormState) =>

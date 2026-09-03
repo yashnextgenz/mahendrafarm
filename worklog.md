@@ -345,3 +345,38 @@ Stage Summary:
 - Page count is now 13 top-level routes: `/`, `/about`, `/farming-activities`, `/products`, `/gallery`, `/blog`, `/distributor`, `/search`, `/privacy`, `/faq`, `/site-map`, `/careers`, `/admin` (plus dynamic `/blog/[slug]`, `/blog/category/[cat]`, `opengraph-image`, `not-found`, `error`, loading states). The original 5 required routes are unchanged and intact.
 - Unresolved / risks: none blocking. The job application form simulates submission (no backend API yet) — a future round could add a `/api/applications` route + `JobApplication` Prisma model to persist applications in the admin dashboard.
 - Next-phase priorities (for round 11): wire the job application form to a real `/api/applications` route + Prisma model, add Next.js blur placeholders for the local images, add a reading-time badge to the blog hero, add a BreadcrumbList to /careers + /privacy + /faq, add a "related articles by category" widget on the blog detail sidebar, and consider a /team page for the farm's people.
+
+---
+Task ID: 11
+Agent: main (Z.ai Code) — recurring webDevReview round 11
+Task: QA the existing site, then add more features & styling (mandatory). Focus: wire job applications to real backend + admin view, BreadcrumbList on /careers+/privacy+/faq, related-articles widget on blog detail.
+
+Work Log:
+- Read worklog.md (rounds 1–10) and confirmed the site was stable: all 18 tested routes 200 (1 intentional 404), lint clean, no console errors, mobile 390px no overflow.
+- QA via agent-browser at round start: re-confirmed all routes 200, zero console errors, mobile 390px scrollWidth === 390. No bugs to fix — proceeded to new feature work.
+- **Wired the job application form to a real backend:**
+  - Added a `JobApplication` model to `prisma/schema.prisma` (id, name, email, phone, jobId, message, status, timestamps + indexes on status/jobId/createdAt) and ran `bun run db:push` to sync SQLite.
+  - Created `src/app/api/applications/route.ts` — `POST` validates all fields server-side (email/phone regex, jobId allowlist against `JOB_OPENINGS`, message length), persists to Prisma, returns `{ok, id}` or `{ok:false, errors}` (422) / error (500). `GET` is token-guarded (`ADMIN_TOKEN`) and returns the latest 200 applications.
+  - Created `src/app/api/applications/[id]/route.ts` — `PATCH` (token-guarded) to update status (new/reviewing/interviewed/hired/rejected), `DELETE` (token-guarded) to remove an application.
+  - Updated `JobApplicationForm.tsx` to `fetch('/api/applications', {method:'POST'})` with success (clear + thank-you), server-side field error mirroring, and red error pill on failure.
+  - Resolved the Prisma client staleness issue (the running dev server held the old client without the `jobApplication` model) by touching `next.config.ts` to trigger a full reload after `db:push` + `db:generate`.
+  - Verified end-to-end: curl POST returns `{ok:true,id}`, GET returns the persisted application; the UI form submit shows "Thank you! We'll review and be in touch."; DB confirms both "Test Applicant" (dairy-attendant) and "Karthik Farmer" (field-supervisor) persisted with `status:"new"`.
+- **Extended the admin dashboard** with a Job Applications table:
+  - Added `applications` state + `Application` type + `APP_STATUS_OPTIONS`/`APP_STATUS_STYLES` (new/reviewing/interviewed/hired/rejected, color-coded).
+  - `fetchData` now also fetches `/api/applications` (token-guarded) in parallel; added a 5th stat card "Job Applications" (Briefcase icon, purple tint) to the 5-column stat grid.
+  - Added a full Job Applications table below the Contact Enquiries table: applicant (name/email/phone/date), position (jobId pill), note (message preview), status `<select>` (5 color-coded options), and delete button (with confirm). `updateAppStatus` and `deleteApplication` wire to the new API routes.
+  - Verified: 5 stat cards render (Total Enquiries, New, Subscribers, Active Subs, Job Applications); the applications section exists and shows persisted applications.
+- **Added BreadcrumbList JSON-LD** to `/careers`, `/privacy`, and `/faq`:
+  - Each page now injects a `BreadcrumbList` script (Home > [Page Name]) alongside any existing JSON-LD (the /faq page now has both FAQPage + BreadcrumbList).
+  - Verified: all three pages contain `"@type":"BreadcrumbList"` in the HTML.
+- **Added a "More in [category]" widget** to the blog detail sidebar:
+  - Below the TOC in the sticky `<aside>`, a compact card listing up to 3 related same-category articles (using the existing `related` posts) with bullet markers and hover color change. Helps readers continue exploring the same topic.
+  - Verified: the "More in [category]" widget exists on the blog detail page.
+- Final QA: `bun run lint` clean; all 18 tested routes return correct status (200 for valid, 404 for invalid); applications API POST persists + GET returns applications (token-guarded); admin dashboard shows 5 stat cards + Job Applications table; BreadcrumbList JSON-LD on /careers+/privacy+/faq; "More in [category]" widget on blog detail; mobile 390px scrollWidth === 390 on /careers and /admin.
+
+Stage Summary:
+- Round 11 added 4 substantive features: (1) a full job-applications backend (`JobApplication` Prisma model + `/api/applications` POST/GET + `/api/applications/[id]` PATCH/DELETE, all token-guarded) with the JobApplicationForm now hitting the real API, and a new Job Applications table + 5th stat card in the admin dashboard; (2) BreadcrumbList JSON-LD on /careers, /privacy, /faq; (3) a "More in [category]" related-articles widget on the blog detail sidebar; (4) resolved the Prisma client staleness after schema push. The admin dashboard is now a complete operations console (enquiries + subscribers + job applications) with status management + delete for all record types.
+- New artifacts: `src/app/api/applications/route.ts`, `src/app/api/applications/[id]/route.ts`; updated `prisma/schema.prisma` (JobApplication model), `src/components/site/JobApplicationForm.tsx` (real API), `src/app/admin/page.tsx` (applications state + table + 5th stat card + updateAppStatus/deleteApplication), `src/app/careers/page.tsx` (BreadcrumbList), `src/app/privacy/page.tsx` (BreadcrumbList), `src/app/faq/page.tsx` (BreadcrumbList), `src/app/blog/[slug]/page.tsx` (More-in-category widget in aside).
+- Page/route count unchanged: 13 top-level routes + dynamic blog + category + opengraph-image + not-found + error + loading states + 6 API route groups (contact, contact/list, contact/[id], newsletter, search, applications, applications/[id]).
+- Unresolved / risks: none blocking. The dev server needed a reload after the Prisma schema push — the `db.ts` staleness guard from round 3 handles this automatically on next import, but a running process still needs a config-touch reload.
+- Next-phase priorities (for round 12): add Next.js blur placeholders for the local images, add a reading-time badge to the blog hero, add a /team page for the farm's people, add a CSV export button to the admin dashboard (enquiries + applications), add a "recent activity" timeline widget to the admin, and add a webhook/notification stub for new high-priority enquiries.

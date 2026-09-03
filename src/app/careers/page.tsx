@@ -23,8 +23,21 @@ const PERKS = [
 export default function CareersPage() {
   const jobOptions = JOB_OPENINGS.map((j) => ({ id: j.id, title: j.title }));
 
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://mahindraintegratedfarm.example" },
+      { "@type": "ListItem", position: 2, name: "Careers", item: "https://mahindraintegratedfarm.example/careers" },
+    ],
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
       <PageHero
         eyebrow="Grow With Us"
         title="Careers At The Farm"

@@ -76,3 +76,19 @@ model Subscriber {
 
   @@index([active])
 }
+
+model JobApplication {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String
+  jobId     String
+  message   String
+  status    String   @default("new")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([jobId])
+  @@index([createdAt])
+}

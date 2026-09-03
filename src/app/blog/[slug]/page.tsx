@@ -278,8 +278,32 @@ export default async function BlogDetailPage({ params }: { params: Params }) {
             </div>
 
             {/* Sticky TOC sidebar (xl+) */}
-            <aside className="min-w-0">
+            <aside className="min-w-0 space-y-6">
               <TableOfContents items={toc} />
+
+              {/* More in this category */}
+              {related.length > 0 && (
+                <div className="sticky top-24 rounded-3xl bg-white p-5 shadow-soft ring-1 ring-black/5">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-mediumgreen">
+                    More in {post.category}
+                  </p>
+                  <ul className="mt-3 space-y-3">
+                    {related.slice(0, 3).map((rp) => (
+                      <li key={rp.id}>
+                        <Link
+                          href={`/blog/${rp.slug}`}
+                          className="group flex items-start gap-2.5"
+                        >
+                          <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-mediumgreen" />
+                          <span className="text-sm leading-snug text-ink/70 transition-colors group-hover:text-forest">
+                            {rp.title}
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </aside>
           </div>
         </div>
