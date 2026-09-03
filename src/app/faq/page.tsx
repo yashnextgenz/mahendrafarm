@@ -19,8 +19,27 @@ export const metadata: Metadata = {
 };
 
 export default function FAQPage() {
+  // FAQPage JSON-LD structured data (combines general + distributor FAQs)
+  const allFaqs = [...GENERAL_FAQS, ...DISTRIBUTOR_FAQS];
+  const faqLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: allFaqs.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: f.a,
+      },
+    })),
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+      />
       <PageHero
         eyebrow="Got Questions?"
         title="Frequently Asked Questions"

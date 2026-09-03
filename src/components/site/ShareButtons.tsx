@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Share2, Link2, Check, Facebook, Twitter, MessageCircle } from "lucide-react";
+import { Share2, Link2, Check, Facebook, Twitter, MessageCircle, Mail } from "lucide-react";
 
 type ShareButtonsProps = {
   title: string;
@@ -12,7 +12,7 @@ type ShareButtonsProps = {
 /**
  * Social share buttons for a blog article. Uses the current URL at click time
  * (so it works correctly after any client-side routing). WhatsApp, Facebook,
- * X (Twitter), and a "copy link" button with a copied-confirmation state.
+ * X (Twitter), Email, and a "copy link" button with a copied-confirmation state.
  */
 export function ShareButtons({ title, className }: ShareButtonsProps) {
   const [copied, setCopied] = useState(false);
@@ -20,15 +20,20 @@ export function ShareButtons({ title, className }: ShareButtonsProps) {
   const getUrl = () =>
     typeof window !== "undefined" ? window.location.href : "";
 
-  const share = (network: "whatsapp" | "facebook" | "twitter") => {
+  const share = (network: "whatsapp" | "facebook" | "twitter" | "email") => {
     const url = encodeURIComponent(getUrl());
     const text = encodeURIComponent(title);
     const links: Record<typeof network, string> = {
       whatsapp: `https://wa.me/?text=${text}%20${url}`,
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
       twitter: `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
+      email: `mailto:?subject=${text}&body=I%20thought%20you%20might%20like%20this%20article%20from%20Mahindra%20Integrated%20Farm%3A%0A%0A${url}`,
     };
-    window.open(links[network], "_blank", "noopener,noreferrer,width=640,height=540");
+    if (network === "email") {
+      window.location.href = links[network];
+    } else {
+      window.open(links[network], "_blank", "noopener,noreferrer,width=640,height=540");
+    }
   };
 
   const copyLink = async () => {
@@ -73,6 +78,14 @@ export function ShareButtons({ title, className }: ShareButtonsProps) {
         className={cn(btn, "bg-white/10 text-lightgreen hover:bg-white/20")}
       >
         <Twitter className="h-4 w-4" />
+      </button>
+      <button
+        type="button"
+        onClick={() => share("email")}
+        aria-label="Share via email"
+        className={cn(btn, "bg-white/10 text-lightgreen hover:bg-white/20")}
+      >
+        <Mail className="h-4 w-4" />
       </button>
       <button
         type="button"

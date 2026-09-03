@@ -313,3 +313,35 @@ Stage Summary:
 - Page count is now 12 top-level routes: `/`, `/about`, `/farming-activities`, `/products`, `/gallery`, `/blog`, `/distributor`, `/search`, `/privacy`, `/faq`, `/site-map`, `/admin` (plus dynamic `/blog/[slug]`, `/blog/category/[cat]`, `opengraph-image`, `not-found`, `error`, loading states). The original 5 required routes are unchanged and intact.
 - Unresolved / risks: none blocking. The dev server had to be restarted mid-round due to the /sitemap route conflict — the next reviewer should verify the dev server is up before testing.
 - Next-phase priorities (for round 10): add Next.js blur placeholders for the local images, add a reading-time estimate badge to the blog hero, add a `/team` or `/careers` page, add structured FAQPage JSON-LD to the /faq page, add a "popular tags" cloud to the search page, add a print-friendly stylesheet for the site-map, and consider an email-this-article button on blog detail.
+
+---
+Task ID: 10
+Agent: main (Z.ai Code) — recurring webDevReview round 10
+Task: QA the existing site, then add more features & styling (mandatory). Focus: FAQPage JSON-LD, email share button, /careers page, popular search chips.
+
+Work Log:
+- Read worklog.md (rounds 1–9) and confirmed the site was stable: all 17 tested routes 200 (1 intentional 404), lint clean, no console errors, mobile 390px no overflow.
+- QA via agent-browser at round start: re-confirmed all routes 200, zero console errors, mobile 390px scrollWidth === 390. No bugs to fix — proceeded to new feature work.
+- **Added FAQPage JSON-LD structured data** to the `/faq` page:
+  - Combines both `GENERAL_FAQS` (6) + `DISTRIBUTOR_FAQS` (6) into a single `FAQPage` schema with 12 `Question` entities (each with `acceptedAnswer.text`). Injected as a `<script type="application/ld+json">` at the top of the page. This enables FAQ rich results in search engines (expandable Q&A snippets).
+  - Verified: `curl /faq` contains `"@type":"FAQPage"`.
+- **Added an email-this-article button** to the blog detail share buttons:
+  - Updated `ShareButtons` to include a 5th button (Mail icon) that opens a `mailto:` link with the article title as subject and a pre-filled body ("I thought you might like this article from Mahindra Integrated Farm: [URL]"). Email uses `window.location.href` (same-tab navigation) rather than `window.open` (popup) since mailto isn't a URL to open in a new tab.
+  - Verified: the "Share via email" button renders alongside WhatsApp, Facebook, X, and Copy link (5 share buttons total).
+- **Added a dedicated `/careers` page** with open positions + application form:
+  - New `JOB_OPENINGS` data export in `site.ts` — 4 realistic roles (Farm Field Supervisor, Dairy Farm Attendant, Delivery & Logistics Coordinator, Seasonal Harvest Helper) each with type (Full-time/Seasonal), location, category, description, and responsibilities.
+  - New `JobApplicationForm` client component (`src/components/site/JobApplicationForm.tsx`) with name/email/phone/position-dropdown/message fields, frontend validation (email/phone regex, min lengths), loading/success/error states, and a preselected-job option.
+  - New `/careers` page (`src/app/careers/page.tsx`) with 4 sections: PageHero, Why Work With Us (4 perk cards: Work With Nature, Fair & Honest, Learn & Grow, Real Impact), Current Job Openings (4 job cards with type/category/location badges + responsibilities + Apply button linking to `#apply`), and an Apply Now section with the application form + a "Don't See The Right Role?" CTA.
+  - Added `/careers` to `sitemap.ts`.
+  - Verified: all sections render (perks, jobs with 4 cards, apply form); the form shows 5 validation errors on empty submit; VLM confirmed the hero + structure.
+- **Added "Popular searches" quick-link chips** to the `/search` page:
+  - 6 chips (dairy, vegetables, natural farming, distributor, eggs, coconut) shown when the search input is empty. Clicking a chip fills the search input with that term, which triggers the debounced search automatically.
+  - Verified: 6 chips render; clicking "dairy" sets the input value to "dairy" and shows results.
+- Final QA: `bun run lint` clean; all 18 tested routes return correct status (200 for valid, 404 for invalid); FAQPage JSON-LD present on /faq; email share button (5 total) on blog detail; /careers renders all sections + validated application form; popular search chips work; mobile 390px scrollWidth === 390 on /careers and /search; sitemap now has 24 URLs (added /careers).
+
+Stage Summary:
+- Round 10 added 4 substantive features: (1) FAQPage JSON-LD on /faq (12 Q&A entities for rich search results); (2) email-this-article share button on blog detail (mailto with subject + body, 5 share buttons total); (3) a dedicated `/careers` page with 4 job openings, perk cards, and a validated application form (JobApplicationForm client component + JOB_OPENINGS data); (4) popular search chips on /search (6 terms, click-to-search). Sitemap updated to 24 URLs.
+- New artifacts: `src/components/site/JobApplicationForm.tsx`, `src/app/careers/page.tsx`; updated `src/app/faq/page.tsx` (FAQPage JSON-LD), `src/components/site/ShareButtons.tsx` (email button + Mail icon), `src/components/site/SearchExplorer.tsx` (POPULAR_SEARCHES + chips UI), `src/data/site.ts` (JOB_OPENINGS), `src/app/sitemap.ts` (+/careers).
+- Page count is now 13 top-level routes: `/`, `/about`, `/farming-activities`, `/products`, `/gallery`, `/blog`, `/distributor`, `/search`, `/privacy`, `/faq`, `/site-map`, `/careers`, `/admin` (plus dynamic `/blog/[slug]`, `/blog/category/[cat]`, `opengraph-image`, `not-found`, `error`, loading states). The original 5 required routes are unchanged and intact.
+- Unresolved / risks: none blocking. The job application form simulates submission (no backend API yet) — a future round could add a `/api/applications` route + `JobApplication` Prisma model to persist applications in the admin dashboard.
+- Next-phase priorities (for round 11): wire the job application form to a real `/api/applications` route + Prisma model, add Next.js blur placeholders for the local images, add a reading-time badge to the blog hero, add a BreadcrumbList to /careers + /privacy + /faq, add a "related articles by category" widget on the blog detail sidebar, and consider a /team page for the farm's people.

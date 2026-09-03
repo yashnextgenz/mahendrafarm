@@ -28,6 +28,15 @@ const TYPE_META: Record<
   activity: { label: "Activity", Icon: Sprout, tint: "bg-lightgreen text-forest" },
 };
 
+const POPULAR_SEARCHES = [
+  "dairy",
+  "vegetables",
+  "natural farming",
+  "distributor",
+  "eggs",
+  "coconut",
+];
+
 export function SearchExplorer() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Results | null>(null);
@@ -108,6 +117,28 @@ export function SearchExplorer() {
           </button>
         )}
       </div>
+
+      {/* Popular searches (shown when no query) */}
+      {!query.trim() && (
+        <div className="mt-5">
+          <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-ink/40">
+            Popular searches
+          </p>
+          <div className="mt-3 flex flex-wrap justify-center gap-2">
+            {POPULAR_SEARCHES.map((term) => (
+              <button
+                key={term}
+                type="button"
+                onClick={() => setQuery(term)}
+                className="inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-sm font-medium text-forest shadow-soft ring-1 ring-mediumgreen/20 transition-all duration-200 hover:bg-forest hover:text-white hover:ring-forest"
+              >
+                <Search className="h-3 w-3" />
+                {term}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Helper text */}
       <p className="mt-3 text-center text-sm text-ink/60">

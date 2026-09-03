@@ -563,3 +563,75 @@ export const GENERAL_FAQS: FAQ[] = [
     a: "We accept UPI, bank transfer and cash on delivery (for established customers in served regions). Your distributor or our team will share the exact payment details when you place an order.",
   },
 ];
+
+export type JobOpening = {
+  id: string;
+  title: string;
+  type: "Full-time" | "Part-time" | "Contract" | "Seasonal";
+  location: string;
+  category: string;
+  description: string;
+  responsibilities: string[];
+};
+
+export const JOB_OPENINGS: JobOpening[] = [
+  {
+    id: "field-supervisor",
+    title: "Farm Field Supervisor",
+    type: "Full-time",
+    location: "Tiruppallipatti, Tamil Nadu",
+    category: "Operations",
+    description:
+      "Lead day-to-day field operations across our vegetable and plantation units. You'll coordinate a small team, monitor crop health, and ensure our natural farming practices are followed consistently.",
+    responsibilities: [
+      "Supervise daily planting, weeding and harvesting activities",
+      "Train and guide farm workers on natural farming methods",
+      "Monitor crop health and report issues to the farm manager",
+      "Maintain accurate records of yields and inputs",
+    ],
+  },
+  {
+    id: "dairy-attendant",
+    title: "Dairy Farm Attendant",
+    type: "Full-time",
+    location: "Tiruppallipatti, Tamil Nadu",
+    category: "Livestock",
+    description:
+      "Care for our dairy herd through morning and evening milking cycles. Ensure animal welfare, cleanliness, and the hygienic handling of milk from cow to cooling tank.",
+    responsibilities: [
+      "Perform twice-daily milking following hygiene protocols",
+      "Feed, water and monitor the health of dairy cows",
+      "Clean and maintain the dairy shelter and equipment",
+      "Assist with cooling and initial quality checks of milk",
+    ],
+  },
+  {
+    id: "delivery-coordinator",
+    title: "Delivery & Logistics Coordinator",
+    type: "Full-time",
+    location: "Trichy / Tiruppallipatti, Tamil Nadu",
+    category: "Logistics",
+    description:
+      "Coordinate the dispatch of fresh produce, dairy and poultry to our customers and distributors. Ensure timely, cold-chain-compliant delivery across Tamil Nadu.",
+    responsibilities: [
+      "Plan and schedule daily delivery routes",
+      "Coordinate with drivers, distributors and the farm team",
+      "Track orders and resolve delivery issues promptly",
+      "Maintain delivery records and customer feedback",
+    ],
+  },
+  {
+    id: "seasonal-harvest-helper",
+    title: "Seasonal Harvest Helper",
+    type: "Seasonal",
+    location: "Tiruppallipatti, Tamil Nadu",
+    category: "Operations",
+    description:
+      "Support our team during peak harvest seasons. A great way to experience farm life and learn natural farming practices first-hand.",
+    responsibilities: [
+      "Assist with harvesting, sorting and packing of produce",
+      "Help with general farm upkeep during busy periods",
+      "Follow safety and hygiene guidelines",
+    ],
+  },
+];
