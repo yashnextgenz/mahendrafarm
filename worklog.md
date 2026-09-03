@@ -211,3 +211,41 @@ Stage Summary:
 - Page count is now 8 top-level routes + dynamic category + dynamic blog slug + opengraph-image + not-found. The original 5 required routes are unchanged and intact.
 - Unresolved / risks: none blocking. The dev server process was killed by the sandbox mid-round (background process limitation); I restarted it with a subshell `(bun run dev ... &)` for testing. The next reviewer should verify the dev server is up before testing.
 - Next-phase priorities (for round 7): wire cookie-consent choice to gate analytics, add Next.js blur placeholders for the local images, add a `/search` route for site-wide search, add a "popular posts" / "trending" sidebar to the blog, add a privacy policy page, add a loading.tsx for the blog + admin routes, and consider a custom error.tsx boundary.
+
+---
+Task ID: 7
+Agent: main (Z.ai Code) — recurring webDevReview round 7
+Task: QA the existing site, then add more features & styling (mandatory). Focus: loading skeletons, site-wide search, privacy policy, popular posts sidebar.
+
+Work Log:
+- Read worklog.md (rounds 1–6) and confirmed the site was stable: all 14 tested routes 200 (1 intentional 404), lint clean, no console errors, mobile 390px no overflow.
+- QA via agent-browser at round start: re-confirmed all routes 200, zero console errors, mobile 390px scrollWidth === 390. No bugs to fix — proceeded to new feature work.
+- **Added loading.tsx skeletons** for 4 routes:
+  - New reusable `Skeleton` component (`src/components/site/Skeleton.tsx`) with `Skeleton`, `BlogCardSkeleton`, and `FeaturedPostSkeleton` sub-components (CSS-only pulse animation, no libraries).
+  - `src/app/blog/loading.tsx` — hero skeleton + featured post skeleton + 6 blog-card skeletons.
+  - `src/app/blog/[slug]/loading.tsx` — hero skeleton + article body skeleton (headings + paragraphs).
+  - `src/app/products/loading.tsx` — hero skeleton + filter pills skeleton + 8 product-card skeletons.
+  - `src/app/admin/loading.tsx` — header skeleton + 4 stat-card skeletons + table row skeletons.
+  - These show automatically during server-component data fetches, improving perceived performance.
+- **Added a site-wide `/search` page with live search:**
+  - New `GET /api/search?q=...` route (`src/app/api/search/route.ts`) — searches blog posts (Prisma `contains` across title/excerpt/content/category), products (static PRODUCTS), and activities (static ACTIVITIES). Returns categorized results + total count. Min 2 chars.
+  - New `SearchExplorer` client component (`src/components/site/SearchExplorer.tsx`) — autofocus input, 350ms debounced fetch, loading spinner, live result count, result cards with type labels (Article/Product/Activity) + icons + category + excerpt, and an empty state with helpful links.
+  - New `/search` page (`src/app/search/page.tsx`) with a PageHero + the explorer.
+  - Added a search icon link to the Navbar (both desktop and mobile, next to the theme toggle) so search is always one click away.
+  - Verified: typing "dairy" returns 6 results (3 blog + 2 products + 1 activity); "farming" returns 8 results; VLM confirms result cards with type labels, titles, excerpts, and a "6 results for 'dairy'" count.
+- **Added a `/privacy` privacy policy page:**
+  - New `src/app/privacy/page.tsx` with a PageHero + 6 clearly-written sections (What We Collect, How We Use Your Information, Cookies, Data Storage & Security, Your Rights, Contacting Us) each with an icon, plus a "last updated" date and a final CTA. References the actual SITE email/phone/address and the `mif-cookie-consent` localStorage key.
+  - Verified: 6 `<article>` sections render; VLM confirms the structure.
+- **Added a "Popular Reads" sidebar** to the blog listing:
+  - The blog page now computes a `popular` list (featured posts first, then by `readMinutes` desc as a "deep reads" proxy) — top 5.
+  - Rendered as a sticky `xl:` sidebar next to the BlogExplorer: numbered list (01–05) with titles, category + read-time, and a "Search all articles" link at the bottom.
+  - Verified: sidebar exists with 5 items on desktop.
+- **Updated sitemap.ts** to include `/search` and `/privacy` (now 21 URLs total: 9 static + 6 category + 6 blog slugs).
+- Final QA: `bun run lint` clean; all 15 tested routes return correct status (200 for valid, 404 for invalid); search API returns categorized results; search page shows live results with debounce; privacy page renders 6 sections; blog popular sidebar shows 5 items; navbar search icon present on desktop + mobile; mobile 390px scrollWidth === 390 on /search and /privacy; sitemap includes all new routes.
+
+Stage Summary:
+- Round 7 added 4 substantive features: (1) loading.tsx skeletons for /blog, /blog/[slug], /products, /admin (with a reusable Skeleton component); (2) a site-wide /search page + `/api/search` route searching blog posts (Prisma), products, and activities, with a debounced client explorer + navbar search icon; (3) a `/privacy` privacy policy page with 6 sections; (4) a "Popular Reads" sticky sidebar on the blog listing. Sitemap updated to 21 URLs.
+- New artifacts: `src/components/site/{Skeleton,SearchExplorer}.tsx`, `src/app/blog/loading.tsx`, `src/app/blog/[slug]/loading.tsx`, `src/app/products/loading.tsx`, `src/app/admin/loading.tsx`, `src/app/api/search/route.ts`, `src/app/search/page.tsx`, `src/app/privacy/page.tsx`; updated `src/components/site/Navbar.tsx` (search icon), `src/app/blog/page.tsx` (popular posts sidebar + Flame/Tag/Search icons), `src/app/sitemap.ts` (+search +privacy).
+- Page count is now 10 top-level routes: `/`, `/about`, `/farming-activities`, `/products`, `/gallery`, `/blog`, `/distributor`, `/search`, `/privacy`, `/admin` (plus dynamic `/blog/[slug]`, `/blog/category/[cat]`, `opengraph-image`, `not-found`, loading states). The original 5 required routes are unchanged and intact.
+- Unresolved / risks: none blocking. The search API does a Prisma `contains` query (case-insensitive on SQLite) — for a larger post count, consider adding full-text search or pre-indexing. Loading skeletons only appear during actual server delays (fast in dev).
+- Next-phase priorities (for round 8): add Next.js blur placeholders for the local images (`placeholder="blur"` with generated blurDataURLs), add a custom `error.tsx` boundary, add a "popular tags" cloud on the blog, add a reading-time progress + share buttons (social) on blog detail, add a `/faq` dedicated page consolidating all FAQs, add a sitemap-style HTML "site index" page, and consider wiring the cookie-consent choice to actually gate analytics.

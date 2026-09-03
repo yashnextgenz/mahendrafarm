@@ -9,7 +9,7 @@ import { BlogExplorer } from "@/components/site/BlogExplorer";
 import { Reveal } from "@/components/site/Reveal";
 import { Button } from "@/components/site/Button";
 import { BLOG_HERO_IMAGE } from "@/data/site";
-import { ArrowRight, Calendar, Clock, Leaf } from "lucide-react";
+import { ArrowRight, Calendar, Clock, Leaf, Flame, Tag, Search } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Blog & Insights",
@@ -45,6 +45,23 @@ export default async function BlogPage() {
       category: p.category,
       coverImage: p.coverImage,
       author: p.author,
+      readMinutes: p.readMinutes,
+      createdAt: p.createdAt,
+    }));
+
+  // "Popular" posts: featured ones first, then by readMinutes desc (longer = deeper reads).
+  const popular = [...posts]
+    .sort((a, b) => {
+      const fa = a.featured ? 1 : 0;
+      const fb = b.featured ? 1 : 0;
+      if (fa !== fb) return fb - fa;
+      return b.readMinutes - a.readMinutes;
+    })
+    .slice(0, 5)
+    .map((p) => ({
+      slug: p.slug,
+      title: p.title,
+      category: p.category,
       readMinutes: p.readMinutes,
       createdAt: p.createdAt,
     }));
@@ -121,8 +138,60 @@ export default async function BlogPage() {
             title="Fresh From The Farm Journal"
             subtitle="Search or filter our stories on natural farming, seasonal produce, distributors and farm life."
           />
-          <div className="mt-10">
-            <BlogExplorer posts={explorerPosts} />
+          <div className="mt-10 grid grid-cols-1 gap-10 xl:grid-cols-[1fr_18rem]">
+            <div className="min-w-0">
+              <BlogExplorer posts={explorerPosts} />
+            </div>
+
+            {/* Popular posts sidebar (xl+) */}
+            <aside className="hidden xl:block">
+              <div className="sticky top-24 rounded-3xl bg-cream p-6 ring-1 ring-mediumgreen/15">
+                <div className="flex items-center gap-2">
+                  <Flame className="h-5 w-5 text-mediumgreen" />
+                  <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-mediumgreen">
+                    Popular Reads
+                  </h3>
+                </div>
+                <ul className="mt-4 space-y-4">
+                  {popular.map((p, i) => (
+                    <li key={p.slug}>
+                      <Link
+                        href={`/blog/${p.slug}`}
+                        className="group flex items-start gap-3"
+                      >
+                        <span className="mt-0.5 text-2xl font-extrabold leading-none text-lightgreen">
+                          {String(i + 1).padStart(2, "0")}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold leading-snug text-forest transition-colors group-hover:text-mediumgreen">
+                            {p.title}
+                          </p>
+                          <div className="mt-1 flex items-center gap-2 text-[11px] font-medium uppercase tracking-wide text-ink/40">
+                            <span className="inline-flex items-center gap-1">
+                              <Tag className="h-3 w-3" />
+                              {p.category}
+                            </span>
+                            <span className="inline-flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {p.readMinutes} min
+                            </span>
+                          </div>
+                        </div>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-5 border-t border-border pt-4">
+                  <Link
+                    href="/search"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-mediumgreen transition-colors hover:text-forest"
+                  >
+                    <Search className="h-3.5 w-3.5" />
+                    Search all articles
+                  </Link>
+                </div>
+              </div>
+            </aside>
           </div>
 
           {/* Newsletter CTA */}

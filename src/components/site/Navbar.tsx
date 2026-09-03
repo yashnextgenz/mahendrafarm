@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Menu, X, Phone, Leaf } from "lucide-react";
+import { Menu, X, Phone, Leaf, Search } from "lucide-react";
 import { NAV_LINKS, SITE } from "@/data/site";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./ThemeToggle";
@@ -90,8 +90,15 @@ export function Navbar() {
           })}
         </ul>
 
-        {/* Desktop theme toggle + phone CTA */}
+        {/* Desktop search + theme toggle + phone CTA */}
         <div className="hidden items-center gap-2 sm:flex">
+          <Link
+            href="/search"
+            aria-label="Search"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full text-forest ring-1 ring-mediumgreen/20 transition-colors hover:bg-lightgreen hover:ring-mediumgreen/40"
+          >
+            <Search className="h-5 w-5" />
+          </Link>
           <ThemeToggle className="h-9 w-9 ring-1 ring-mediumgreen/20 hover:ring-mediumgreen/40" />
           <a
             href={`tel:${SITE.phoneRaw}`}
@@ -102,8 +109,15 @@ export function Navbar() {
           </a>
         </div>
 
-        {/* Mobile toggle */}
+        {/* Mobile search + theme toggle + hamburger */}
         <div className="flex items-center gap-1.5 lg:hidden">
+          <Link
+            href="/search"
+            aria-label="Search"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full text-forest ring-1 ring-mediumgreen/20 transition-colors hover:bg-lightgreen"
+          >
+            <Search className="h-5 w-5" />
+          </Link>
           <ThemeToggle className="h-9 w-9 ring-1 ring-mediumgreen/20 hover:ring-mediumgreen/40" />
           <button
             type="button"
