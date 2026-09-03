@@ -6,12 +6,15 @@ import { ActivityCard } from "@/components/site/ActivityCard";
 import { ProductCard } from "@/components/site/ProductCard";
 import { FeatureStrip } from "@/components/site/FeatureStrip";
 import { CTASection } from "@/components/site/CTASection";
+import { Testimonials } from "@/components/site/Testimonials";
+import { Reveal } from "@/components/site/Reveal";
 import {
   ACTIVITIES,
   PRODUCTS,
   HERO_IMAGE,
   WHY_CHOOSE_IMAGE,
   WHY_CHOOSE_POINTS,
+  STATS,
   SITE,
 } from "@/data/site";
 import { ArrowRight, CheckCircle2, Phone, Sprout, Leaf, ShieldCheck } from "lucide-react";
@@ -214,8 +217,44 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ============ SECTION 5b: STATS BAND ============ */}
+      <section className="bg-white py-16 sm:py-20" aria-label="Our farm in numbers">
+        <div className="container-page">
+          <Reveal>
+            <div className="grid grid-cols-2 gap-6 rounded-3xl bg-cream px-6 py-10 ring-1 ring-mediumgreen/15 sm:px-10 lg:grid-cols-4">
+              {STATS.map((s) => (
+                <div key={s.label} className="flex flex-col items-center text-center">
+                  <span className="text-4xl font-extrabold tracking-tight text-forest sm:text-5xl">
+                    {s.value}
+                  </span>
+                  <span className="mt-1.5 text-xs font-semibold uppercase tracking-wide text-ink/70 sm:text-sm">
+                    {s.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ============ SECTION 5c: TESTIMONIALS ============ */}
+      <section className="bg-cream py-20 sm:py-24" aria-label="What our customers say">
+        <div className="container-page">
+          <Reveal>
+            <SectionHeading
+              eyebrow="Loved By Families & Partners"
+              title="What Our Customers Say"
+              subtitle="Real stories from households, restaurants and distributors who trust Mahindra Integrated Farm."
+            />
+          </Reveal>
+          <Reveal delay={120} className="mt-12">
+            <Testimonials />
+          </Reveal>
+        </div>
+      </section>
+
       {/* ============ SECTION 6: DISTRIBUTOR CTA ============ */}
-      <section className="bg-cream py-16 sm:py-20" aria-label="Become a distributor">
+      <section className="bg-white py-16 sm:py-20" aria-label="Become a distributor">
         <CTASection />
       </section>
     </>

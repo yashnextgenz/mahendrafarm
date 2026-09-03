@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { Leaf, Phone, Mail, MapPin, Facebook, Instagram, Youtube, MessageCircle } from "lucide-react";
+import { Leaf, Phone, Mail, MapPin, Facebook, Instagram, Youtube, MessageCircle, Send } from "lucide-react";
 import { NAV_LINKS, SITE, FOOTER_ACTIVITIES } from "@/data/site";
+import { NewsletterForm } from "./NewsletterForm";
 
 export function Footer() {
   const year = new Date().getFullYear();
@@ -61,6 +62,22 @@ export function Footer() {
                   <Icon className="h-4 w-4" />
                 </a>
               ))}
+            </div>
+
+            {/* Newsletter */}
+            <div className="mt-7 max-w-sm">
+              <div className="flex items-center gap-2">
+                <Send className="h-4 w-4 text-lightgreen" />
+                <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-lightgreen">
+                  Farm Newsletter
+                </h3>
+              </div>
+              <p className="mt-2 text-xs text-cream/60">
+                Seasonal harvest updates, recipes & distributor news — once a month, no spam.
+              </p>
+              <div className="mt-3">
+                <NewsletterForm />
+              </div>
             </div>
           </div>
 

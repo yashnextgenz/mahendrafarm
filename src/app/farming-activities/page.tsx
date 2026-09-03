@@ -4,6 +4,7 @@ import { PageHero } from "@/components/site/PageHero";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { Button } from "@/components/site/Button";
 import { CTASection } from "@/components/site/CTASection";
+import { Reveal } from "@/components/site/Reveal";
 import { ACTIVITIES, FARMING_HERO_IMAGE } from "@/data/site";
 import { ArrowRight, Sprout, Recycle, Users } from "lucide-react";
 
@@ -33,8 +34,7 @@ export default function FarmingActivitiesPage() {
           />
           <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {ACTIVITIES.map((act, i) => (
-              <article
-                key={act.name}
+              <Reveal as="article" key={act.name} delay={(i % 4) * 80}
                 className="group flex h-full flex-col overflow-hidden rounded-3xl bg-white shadow-soft ring-1 ring-black/5 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-lift"
               >
                 <div className="relative aspect-[4/3] w-full overflow-hidden">
@@ -66,7 +66,7 @@ export default function FarmingActivitiesPage() {
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </a>
                 </div>
-              </article>
+              </Reveal>
             ))}
           </div>
         </div>

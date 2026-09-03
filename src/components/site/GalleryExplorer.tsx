@@ -10,6 +10,18 @@ export function GalleryExplorer() {
   const [active, setActive] = useState<GalleryCategory>("All");
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
+  // Pre-compute counts per category for the filter badges
+  const counts = useMemo(() => {
+    const map = new Map<GalleryCategory, number>();
+    GALLERY_FILTERS.forEach((f) => {
+      map.set(
+        f,
+        f === "All" ? GALLERY.length : GALLERY.filter((g) => g.category === f).length
+      );
+    });
+    return map;
+  }, []);
+
   const filtered = useMemo(() => {
     if (active === "All") return GALLERY;
     return GALLERY.filter((g) => g.category === active);
@@ -19,7 +31,7 @@ export function GalleryExplorer() {
 
   return (
     <div>
-      {/* Filter buttons */}
+      {/* Filter buttons with counts */}
       <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
         {GALLERY_FILTERS.map((f) => (
           <button
@@ -27,7 +39,7 @@ export function GalleryExplorer() {
             type="button"
             onClick={() => setActive(f)}
             className={cn(
-              "rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wide transition-all duration-300 sm:px-5 sm:py-2.5 sm:text-sm",
+              "inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wide transition-all duration-300 sm:px-5 sm:py-2.5 sm:text-sm",
               active === f
                 ? "bg-forest text-white shadow-sm"
                 : "bg-white text-forest ring-1 ring-mediumgreen/30 hover:bg-lightgreen hover:ring-mediumgreen"
@@ -35,6 +47,14 @@ export function GalleryExplorer() {
             aria-pressed={active === f}
           >
             {f}
+            <span
+              className={cn(
+                "inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-bold tabular-nums",
+                active === f ? "bg-white/20 text-white" : "bg-lightgreen text-forest"
+              )}
+            >
+              {counts.get(f) ?? 0}
+            </span>
           </button>
         ))}
       </div>

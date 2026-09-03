@@ -370,3 +370,69 @@ export const DISTRIBUTOR_STEPS = [
       "Sign the agreement, receive your starter kit and begin supplying natural farm products.",
   },
 ];
+
+export type Testimonial = {
+  name: string;
+  role: string;
+  location: string;
+  rating: number;
+  quote: string;
+  initials: string;
+};
+
+export const TESTIMONIALS: Testimonial[] = [
+  {
+    name: "Lakshmi Narayanan",
+    role: "Household Customer",
+    location: "Chennai, TN",
+    rating: 5,
+    initials: "LN",
+    quote:
+      "The vegetables from Mahindra Integrated Farm taste just like the ones from my grandmother's garden. You can tell they're grown without chemicals. Delivery is always on time.",
+  },
+  {
+    name: "Suresh Kumar",
+    role: "Restaurant Owner",
+    location: "Trichy, TN",
+    rating: 5,
+    initials: "SK",
+    quote:
+      "We switched to their dairy and poultry six months ago. Our customers notice the difference in freshness. Reliable supply and honest pricing — exactly what a restaurant needs.",
+  },
+  {
+    name: "Priya Subramanian",
+    role: "Distributor Partner",
+    location: "Salem, TN",
+    rating: 5,
+    initials: "PS",
+    quote:
+      "Becoming a distributor was the best business decision I made last year. Quality products, consistent supply, and a brand people already trust. My margins keep growing.",
+  },
+  {
+    name: "Dr. Ramesh Vetrivel",
+    role: "Wellness Consultant",
+    location: "Coimbatore, TN",
+    rating: 5,
+    initials: "RV",
+    quote:
+      "I recommend natural farm produce to my clients regularly. The transparency and farming practices here are exactly what sustainable agriculture should look like.",
+  },
+  {
+    name: "Anand Krishnan",
+    role: "Retail Store Owner",
+    location: "Madurai, TN",
+    rating: 5,
+    initials: "AK",
+    quote:
+      "From groundnuts to bananas, every product is clean, fresh and well-packed. My customers ask for Mahindra Farm products by name now. Great partnership.",
+  },
+  {
+    name: "Meena Rajasekar",
+    role: "Home Chef",
+    location: "Pudukkottai, TN",
+    rating: 5,
+    initials: "MR",
+    quote:
+      "The marigold flowers and fresh milk I get from them are genuinely farm-fresh. You can smell the difference. I wouldn't buy from anywhere else now.",
+  },
+];

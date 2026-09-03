@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "./Button";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2, AlertCircle } from "lucide-react";
 
 type FormState = {
   name: string;
@@ -34,7 +34,8 @@ const INTERESTS = [
 export function ContactForm({ className }: { className?: string }) {
   const [values, setValues] = useState<FormState>(EMPTY);
   const [errors, setErrors] = useState<Partial<FormState>>({});
-  const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const update = (field: keyof FormState, value: string) => {
     setValues((v) => ({ ...v, [field]: value }));
@@ -64,13 +65,36 @@ export function ContactForm({ className }: { className?: string }) {
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    setServerError(null);
     if (!validate()) return;
     setStatus("loading");
-    // Simulate async submission (no backend wired yet)
-    await new Promise((r) => setTimeout(r, 900));
-    setStatus("success");
-    setValues(EMPTY);
-    setTimeout(() => setStatus("idle"), 4000);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+        errors?: Record<string, string>;
+      };
+      if (res.ok && data.ok) {
+        setStatus("success");
+        setValues(EMPTY);
+        setTimeout(() => setStatus("idle"), 5000);
+      } else if (data.errors) {
+        // Server-side field validation — mirror to field errors
+        setErrors(data.errors as Partial<FormState>);
+        setStatus("idle");
+      } else {
+        setStatus("error");
+        setServerError(data.error ?? "Something went wrong. Please try again.");
+      }
+    } catch {
+      setStatus("error");
+      setServerError("Network error. Please check your connection and try again.");
+    }
   };
 
   const inputClass = (field: keyof FormState) =>
@@ -156,9 +180,21 @@ export function ContactForm({ className }: { className?: string }) {
           )}
         </Button>
         {status === "success" && (
-          <p className="inline-flex items-center gap-2 rounded-full bg-mediumgreen/10 px-4 py-2 text-sm font-medium text-mediumgreen">
+          <p
+            role="status"
+            className="inline-flex items-center gap-2 rounded-full bg-mediumgreen/10 px-4 py-2 text-sm font-medium text-mediumgreen"
+          >
             <CheckCircle2 className="h-4 w-4" />
             Thank you! We&apos;ll be in touch soon.
+          </p>
+        )}
+        {status === "error" && serverError && (
+          <p
+            role="alert"
+            className="inline-flex items-center gap-2 rounded-full bg-red-50 px-4 py-2 text-sm font-medium text-red-600"
+          >
+            <AlertCircle className="h-4 w-4" />
+            {serverError}
           </p>
         )}
       </div>

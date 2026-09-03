@@ -1,0 +1,17 @@
+{
+  "name": "Mahindra Integrated Farm",
+  "short_name": "Mahindra Farm",
+  "description": "Natural Farming, Better Living. Sustainable integrated agriculture.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F5F9E9",
+  "theme_color": "#164D24",
+  "icons": [
+    {
+      "src": "/images/hero.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ]
+}

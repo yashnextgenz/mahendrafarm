@@ -29,3 +29,36 @@ Stage Summary:
 - Artifacts: `src/app/{page,about,farming-activities,products,gallery}/page.tsx`, `src/components/site/*`, `src/data/site.ts`, `public/images/*.jpg` (23 images), `scripts/gen-images.sh`, updated `globals.css` / `layout.tsx` / `next.config.ts`.
 - Unresolved issues / risks: none blocking. The contact form currently simulates submission (no backend wired). Future work could wire the form to an API route / email service, and replace generated images with real farm photography when available.
 - Next-phase priorities (for the recurring webDevReview): add a Next.js API route to persist contact enquiries (Prisma), add a testimonials/reviews section, add a blog/insights page, add structured-data (JSON-LD) for SEO, add a "Back to top" button, and progressively enhance the gallery with category counts + lazy image placeholders.
+
+---
+Task ID: 2
+Agent: main (Z.ai Code) — recurring webDevReview round 2
+Task: QA the existing 5-page Mahindra Integrated Farm site, then add more features and styling detail (mandatory: improve styling + add features/functionality).
+
+Work Log:
+- Read worklog.md (round 1) — confirmed the site is stable: all 5 routes return 200, lint clean, no console errors, no mobile horizontal overflow, all core flows (filter, lightbox, contact form validation) verified.
+- QA round via agent-browser: re-confirmed home/about/farming/products/gallery render with zero console errors; mobile 390px scrollWidth === 390 (no overflow).
+- Added a global **Back-to-Top** floating button (`src/components/site/BackToTop.tsx`): appears after 480px scroll, smooth-scrolls to top, respects `prefers-reduced-motion`, mounted in `layout.tsx`. Verified it appears on scroll and returns scrollY to 0 on click.
+- Added a new **Testimonials** section on the Home page (`src/components/site/Testimonials.tsx` + `TESTIMONIALS` data in `site.ts`): client-side carousel with 6 customer/partner reviews, 5-star ratings, quote card, avatar initials, prev/next arrows, auto-advance every 6s, pause-on-hover, and pagination dots. Verified via VLM — quote, 5 green stars, name + role + location, active dot all render correctly.
+- Added a **Stats band** on the Home page (reusing `STATS`) inside a cream rounded card between Why-Choose-Us and Testimonials.
+- Added a **Newsletter signup form** in the global Footer (`src/components/site/NewsletterForm.tsx`): email validation, loading state, success message, themed for the dark footer. Verified submit shows "Subscribed!" success message on both desktop and mobile.
+- Added **JSON-LD structured data** in `layout.tsx` head: `AgriculturalBusiness` schema with name, slogan, telephone, email, full postal address (Tamil Nadu, 621213), areaServed, makesOffer (7 product lines), knowsAbout (9 farming activities). Verified present in the DOM with `@type: AgriculturalBusiness`. This improves rich-search eligibility.
+- Added a **web manifest** (`public/manifest.webmanifest`) with brand theme color `#164D24` and background `#F5F9E9`, linked from metadata for PWA polish.
+- Enhanced the **Gallery filter buttons** to show per-category counts (All 12, Farms 2, Vegetables 2, Livestock 2, Harvest 2, Team 1, Activities 3) as small pill badges, improving UX discoverability. Verified counts render correctly.
+- Added a lightweight **scroll-reveal animation system** with zero animation libraries:
+  - `src/hooks/use-reveal.ts` — `IntersectionObserver`-based hook, returns `{ref, visible}`. Lazily initializes `visible=true` when `prefers-reduced-motion: reduce` is requested (so accessibility users see content immediately with no animation).
+  - `src/components/site/Reveal.tsx` — wrapper that fades + rises children into view, supports a `delay` prop for staggered grids and a polymorphic `as` prop.
+  - Applied to: Home (stats + testimonials + headings), About (Who We Are, Stats, Values cards with stagger), Farming Activities (all 12 activity cards with row-stagger).
+  - Note: the reveal starts `opacity-0` until scrolled into view; verified content is present in the DOM and reveals correctly when scrolled to (confirmed testimonials/stats render after scroll).
+- **Wired the contact form to a real backend**:
+  - Added a `ContactEnquiry` model to `prisma/schema.prisma` (id, name, email, phone, interest, message, status, timestamps + indexes) and ran `bun run db:push` to sync SQLite.
+  - Created `src/app/api/contact/route.ts` — `POST` validates all fields server-side (email/phone regex, interest allowlist, message length), persists to Prisma, returns `{ok, id}` or `{ok:false, errors}` (422) / error (500). `GET` returns total + new enquiry counts.
+  - Updated `src/components/site/ContactForm.tsx` to `fetch('/api/contact', {method:'POST'})`, handle success (clear + thank-you message), mirror server-side field errors back to inputs, and show a red error pill (`role="alert"`) on network/server failure.
+  - Verified end-to-end: curl POST returns `{ok:true,id}` and GET returns `{total:2,new:2}`; UI submit shows "Thank you! We'll be in touch soon."; DB query confirms both "Test User" (Distributorship) and "Priya QA" (General Enquiry) rows persisted with `status:"new"`.
+- Final QA: `bun run lint` clean; all 5 routes 200; `POST /api/contact` returns 422 for empty payload; mobile 390px scrollWidth === 390; JSON-LD + manifest present; back-to-top, testimonials carousel, newsletter, gallery counts, and the full contact-to-DB flow all verified working via agent-browser.
+
+Stage Summary:
+- Round 2 added 7 substantive enhancements on top of a stable base: Back-to-Top button, Testimonials carousel + stats band, Newsletter form in footer, JSON-LD structured data + web manifest, gallery filter counts, IntersectionObserver scroll-reveal animations (accessibility-aware), and a real Prisma-backed contact API. No animation libraries added — reveal is pure CSS + IO.
+- New artifacts: `src/components/site/{BackToTop,Testimonials,NewsletterForm,Reveal}.tsx`, `src/hooks/use-reveal.ts`, `src/app/api/contact/route.ts`, `public/manifest.webmanifest`; updated `layout.tsx`, `Footer.tsx`, `ContactForm.tsx`, `GalleryExplorer.tsx`, `src/data/site.ts` (TESTIMONIALS), `prisma/schema.prisma` (ContactEnquiry), `app/page.tsx`, `about/page.tsx`, `farming-activities/page.tsx`.
+- Unresolved / risks: none blocking. The newsletter form currently validates on the client only (no persistence); a future round could add a `/api/newsletter` route + `Subscriber` model. Images are AI-generated; replace with real farm photography when available.
+- Next-phase priorities (for the next recurring webDevReview): add a dedicated blog/insights page with a CMS-lite Prisma model, add a sticky "quick quote" mini-form, add an FAQ accordion section on the distributor area, add lazy image blur placeholders (Next.js `placeholder="blur"` via generated blurDataURLs), add a sitemap.xml + robots.txt refinement, add open-graph image generation, and add a "Recent enquiries" admin view protected by a simple token.

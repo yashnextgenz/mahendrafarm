@@ -4,6 +4,8 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
+import { BackToTop } from "@/components/site/BackToTop";
+import { SITE } from "@/data/site";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -36,6 +38,7 @@ export const metadata: Metadata = {
     "plantation",
   ],
   authors: [{ name: "Mahindra Integrated Farm" }],
+  manifest: "/manifest.webmanifest",
   openGraph: {
     title: "Mahindra Integrated Farm | Natural Farming, Better Living",
     description:
@@ -51,6 +54,50 @@ export const metadata: Metadata = {
   },
 };
 
+// JSON-LD structured data for rich search results (AgriculturalBusiness)
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "AgriculturalBusiness",
+  name: "Mahindra Integrated Farm",
+  description:
+    "Integrated sustainable farming company offering naturally grown vegetables, dairy, poultry and plantation products.",
+  slogan: "Natural Farming, Better Living",
+  telephone: `+${SITE.phoneRaw}`,
+  email: SITE.email,
+  url: "https://mahindraintegratedfarm.example",
+  image: "https://mahindraintegratedfarm.example/images/hero.jpg",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress:
+      "1, Mahindra Integrated Farm, Seminar Road, Kariyamanickam West, Sinnamur, Borivell, Tiruppallipatti",
+    addressLocality: "Tiruppallipatti",
+    addressRegion: "Tamil Nadu",
+    postalCode: "621213",
+    addressCountry: "IN",
+  },
+  areaServed: "Tamil Nadu, India",
+  makesOffer: [
+    "Fresh Vegetables",
+    "Flowers",
+    "Dairy Products",
+    "Poultry Products",
+    "Groundnuts & Pulses",
+    "Fruits",
+    "Plantation Products",
+  ],
+  knowsAbout: [
+    "Dairy Farming",
+    "Poultry Farming",
+    "Goat Farming",
+    "Fish Farming",
+    "Mushroom Cultivation",
+    "Vegetable Farming",
+    "Coconut Plantation",
+    "Banana Plantation",
+    "Teak Plantation",
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -58,6 +105,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body
         className={`${poppins.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
@@ -66,6 +119,7 @@ export default function RootLayout({
           <main className="flex-1">{children}</main>
           <Footer />
         </div>
+        <BackToTop />
         <Toaster />
       </body>
     </html>

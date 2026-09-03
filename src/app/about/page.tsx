@@ -4,6 +4,7 @@ import { PageHero } from "@/components/site/PageHero";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { StatsSection } from "@/components/site/StatsSection";
 import { Button } from "@/components/site/Button";
+import { Reveal } from "@/components/site/Reveal";
 import {
   ABOUT_HERO_IMAGE,
   ABOUT_WHO_IMAGE,
@@ -60,6 +61,7 @@ export default function AboutPage() {
       {/* Who We Are */}
       <section className="bg-white py-20 sm:py-24" aria-label="Who we are">
         <div className="container-page">
+          <Reveal>
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
             <div className="relative order-2 lg:order-1">
               <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl shadow-soft">
@@ -103,13 +105,16 @@ export default function AboutPage() {
               </div>
             </div>
           </div>
+          </Reveal>
         </div>
       </section>
 
       {/* Stats */}
       <section className="bg-cream py-16 sm:py-20" aria-label="Our impact in numbers">
         <div className="container-page">
-          <StatsSection stats={STATS} variant="card" />
+          <Reveal>
+            <StatsSection stats={STATS} variant="card" />
+          </Reveal>
         </div>
       </section>
 
@@ -196,17 +201,16 @@ export default function AboutPage() {
             subtitle="The principles that guide every decision on our farm."
           />
           <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {VALUES.map(({ Icon, title, description }) => (
-              <article
-                key={title}
-                className="group rounded-3xl bg-white p-6 shadow-soft ring-1 ring-black/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lift"
+            {VALUES.map(({ Icon, title, description }, i) => (
+              <Reveal as="article" key={title} delay={i * 90}
+                className="group h-full rounded-3xl bg-white p-6 shadow-soft ring-1 ring-black/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lift"
               >
                 <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-lightgreen text-forest transition-colors group-hover:bg-forest group-hover:text-lightgreen">
                   <Icon className="h-6 w-6" strokeWidth={2} />
                 </span>
                 <h3 className="mt-5 text-lg font-bold text-forest">{title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-ink/70">{description}</p>
-              </article>
+              </Reveal>
             ))}
           </div>
         </div>
