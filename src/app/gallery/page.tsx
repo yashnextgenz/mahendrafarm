@@ -3,12 +3,14 @@ import { PageHero } from "@/components/site/PageHero";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { GalleryExplorer } from "@/components/site/GalleryExplorer";
 import { ContactForm } from "@/components/site/ContactForm";
+import { FAQSection } from "@/components/site/FAQSection";
 import { Button } from "@/components/site/Button";
 import {
   GALLERY_HERO_IMAGE,
   SITE,
   DISTRIBUTOR_BENEFITS,
   DISTRIBUTOR_STEPS,
+  DISTRIBUTOR_FAQS,
 } from "@/data/site";
 import { CheckCircle2, Phone, Mail, MapPin, Network, Handshake, Truck, BadgeCheck } from "lucide-react";
 
@@ -124,6 +126,11 @@ export default function GalleryPage() {
             <Button href="#contact" variant="primary" size="lg" withArrow className="shrink-0">
               Become A Distributor
             </Button>
+          </div>
+
+          {/* FAQ */}
+          <div className="mt-16">
+            <FAQSection faqs={DISTRIBUTOR_FAQS} />
           </div>
         </div>
       </section>

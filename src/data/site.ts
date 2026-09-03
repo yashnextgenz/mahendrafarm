@@ -33,6 +33,7 @@ export const NAV_LINKS: NavItem[] = [
   { label: "Farming Activities", href: "/farming-activities" },
   { label: "Products", href: "/products" },
   { label: "Gallery", href: "/gallery" },
+  { label: "Blog", href: "/blog" },
   { label: "Distributor Network", href: "/gallery#distributor" },
   { label: "Contact Us", href: "/gallery#contact" },
 ];
@@ -329,6 +330,7 @@ export const ABOUT_MISSION_IMAGE = `${I}/about-mission.jpg`;
 export const FARMING_HERO_IMAGE = `${I}/farm-diverse.jpg`;
 export const PRODUCTS_HERO_IMAGE = `${I}/harvest.jpg`;
 export const GALLERY_HERO_IMAGE = `${I}/farmland-wide.jpg`;
+export const BLOG_HERO_IMAGE = `${I}/farm-diverse.jpg`;
 
 export const STATS = [
   { value: "10+", label: "Farming Activities" },
@@ -434,5 +436,44 @@ export const TESTIMONIALS: Testimonial[] = [
     initials: "MR",
     quote:
       "The marigold flowers and fresh milk I get from them are genuinely farm-fresh. You can smell the difference. I wouldn't buy from anywhere else now.",
+  },
+];
+
+export const BLOG_CATEGORIES = [
+  "All",
+  "Sustainability",
+  "Farming Practices",
+  "Dairy",
+  "Vegetables",
+  "Poultry",
+  "Distributor Network",
+] as const;
+
+export type FAQ = { q: string; a: string };
+
+export const DISTRIBUTOR_FAQS: FAQ[] = [
+  {
+    q: "What is the minimum order quantity to start as a distributor?",
+    a: "There is no heavy upfront commitment. Most new distributors begin with a mixed starter stock of vegetables, dairy and a few plantation products. We agree a sensible minimum based on your region during onboarding — typically tuned so first-time partners can move stock within a week.",
+  },
+  {
+    q: "Which regions do you currently supply?",
+    a: "Our distributor network is strongest across Tamil Nadu — including Trichy, Salem, Madurai, Coimbatore, Pudukkottai and Chennai. If you are outside these areas but can manage your own logistics, we are happy to discuss a partnership.",
+  },
+  {
+    q: "How fresh are the products when they reach me?",
+    a: "Very. Vegetables are harvested to order, milk is cooled and dispatched the same day, and eggs are collected daily. Depending on your location, stock typically reaches you within 24–48 hours of leaving the farm.",
+  },
+  {
+    q: "Do you provide marketing support?",
+    a: "Yes. We share product photography, shelf-ready signage, a short brand story and seasonal highlights. We also feature active distributors in our own channels from time to time.",
+  },
+  {
+    q: "What margins can a distributor expect?",
+    a: "Margins vary by product category, but they are transparent and agreed up front before you sign. Dairy and plantation products carry steady, predictable margins; seasonal vegetables can carry higher margins during peak demand. We never change terms mid-agreement.",
+  },
+  {
+    q: "Can I start small and scale up later?",
+    a: "Absolutely. Many of our current partners began with a single product line and expanded over a few months. We grow with you — your order size and product mix can evolve as your customer base grows.",
   },
 ];

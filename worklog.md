@@ -62,3 +62,40 @@ Stage Summary:
 - New artifacts: `src/components/site/{BackToTop,Testimonials,NewsletterForm,Reveal}.tsx`, `src/hooks/use-reveal.ts`, `src/app/api/contact/route.ts`, `public/manifest.webmanifest`; updated `layout.tsx`, `Footer.tsx`, `ContactForm.tsx`, `GalleryExplorer.tsx`, `src/data/site.ts` (TESTIMONIALS), `prisma/schema.prisma` (ContactEnquiry), `app/page.tsx`, `about/page.tsx`, `farming-activities/page.tsx`.
 - Unresolved / risks: none blocking. The newsletter form currently validates on the client only (no persistence); a future round could add a `/api/newsletter` route + `Subscriber` model. Images are AI-generated; replace with real farm photography when available.
 - Next-phase priorities (for the next recurring webDevReview): add a dedicated blog/insights page with a CMS-lite Prisma model, add a sticky "quick quote" mini-form, add an FAQ accordion section on the distributor area, add lazy image blur placeholders (Next.js `placeholder="blur"` via generated blurDataURLs), add a sitemap.xml + robots.txt refinement, add open-graph image generation, and add a "Recent enquiries" admin view protected by a simple token.
+
+---
+Task ID: 3
+Agent: main (Z.ai Code) — recurring webDevReview round 3
+Task: QA the existing site, then add more features & styling (mandatory). Focus: blog/insights page, FAQ accordion, newsletter persistence, sitemap/robots SEO.
+
+Work Log:
+- Read worklog.md (rounds 1+2) and confirmed the site was stable: all 5 routes 200, lint clean, no console errors, mobile 390px no overflow.
+- QA via agent-browser at round start: re-confirmed home/about/farming/products/gallery 200, zero console errors, mobile 390px scrollWidth === 390. No bugs to fix — proceeded to new feature work.
+- **Added a full Blog/Insights system (Prisma-backed CMS-lite):**
+  - New `BlogPost` model in `prisma/schema.prisma` (slug unique, title, excerpt, content, category, coverImage, author, readMinutes, published, featured, timestamps + indexes on published/createdAt/category).
+  - Wrote `scripts/seed-blog.ts` with 6 rich, on-brand articles (Why Natural Farming Matters; Integrated Farming Explained; From Our Cows To Your Milk; Seasonal Vegetables Guide; Becoming A Distributor; Truth About Free-Range Eggs) across 6 categories. Ran it — all 6 posts created in the DB.
+  - New `BlogCard` reusable component (image, category pill, date, read time, title, excerpt, Read More).
+  - New `/blog` listing page (server component): reads published posts from Prisma, shows a featured post split-card + a grid of the rest + a newsletter CTA. Uses `Reveal` for staggered animations.
+  - New `/blog/[slug]` detail page: `generateStaticParams` for known slugs + `generateMetadata` for per-article SEO (OpenGraph article type + Twitter card). Hero header over the cover image with category/date/read-time; white article card with a tiny markdown-ish renderer (`## `→h2, `# `→h1, paragraphs); author/action bar; related-articles grid (same-category fallback). Per-article **JSON-LD `Article` schema** injected in the page head (headline, datePublished, author, publisher, articleSection).
+  - Added "Blog" to the global navbar (`NAV_LINKS`) and footer quick links; added `BLOG_HERO_IMAGE` to site.ts.
+  - Added a **"Latest From Our Blog" teaser section** on the Home page (async server component, fetches 3 latest posts) between Testimonials and the Distributor CTA.
+- **Added an FAQ accordion** on the `/gallery` Distributor Network section:
+  - 6 honest, on-brand Q&A items in `DISTRIBUTOR_FAQS` (minimum order, regions, freshness, marketing support, margins, scaling) in `site.ts`.
+  - New `FAQSection` client component using the existing shadcn `Accordion` (single-collapsible, first item open by default, themed for the dark-green distributor section). Verified it toggles correctly via agent-browser (clicking a closed item expands it and collapses the open one).
+- **Wired the newsletter form to a real backend:**
+  - New `Subscriber` model in `prisma/schema.prisma` (unique email, source, active flag, timestamps + index).
+  - New `POST /api/newsletter` route: validates email, upserts (idempotent — reactivates if already exists but inactive), returns `{ok, created}` / `{ok, reactivated}` / error. Added `GET` for counts.
+  - Updated `NewsletterForm.tsx` to `fetch('/api/newsletter')` with success + error states (`role="status"` / `role="alert"`). Verified: curl POST returns `{ok:true,created:true}`, GET returns `{total:1,active:1}`, and the DB persists the subscriber.
+- **Added sitemap.xml + robots.ts for SEO:**
+  - New `src/app/sitemap.ts` — emits all 6 static routes + all published blog slugs (with `lastModified`, `changeFrequency`, `priority`). Verified: 12 URLs total (6 static + 6 blog).
+  - New `src/app/robots.ts` — allows all, disallows `/api/`, declares host + sitemap. Removed the conflicting static `public/robots.txt` (Next.js warned about the conflict).
+  - Added per-article JSON-LD `Article` structured data (in addition to the global `AgriculturalBusiness` from layout) — verified 4 JSON-LD scripts present on the blog detail page: AgriculturalBusiness, Article, Organization, PostalAddress.
+- **Resolved a Prisma client staleness issue:** after `db:push` + `db:generate`, the running dev server still held the OLD `PrismaClient` (without blogPost/subscriber) in its `globalThis.prisma` cache, causing `db.blogPost` → `undefined` 500s on `/blog`. Hardened `src/lib/db.ts` with a `hasAllModels()` guard that discards a stale cached client, AND triggered a full dev-server reload by touching `next.config.ts` so the freshly-generated `@prisma/client` was loaded into memory. All blog routes then returned 200.
+- Final QA: `bun run lint` clean; all 5 original routes + `/blog` + `/blog/[slug]` + `/sitemap.xml` + `/robots.txt` return 200; `POST /api/newsletter` persists; mobile 390px scrollWidth === 390 on home + /blog + /blog/[slug]; blog listing + detail + FAQ accordion verified visually via agent-browser + VLM; JSON-LD + sitemap + robots confirmed.
+
+Stage Summary:
+- Round 3 added 5 substantive features: (1) a Prisma-backed blog with listing + detail pages, seeded content, SEO metadata + JSON-LD Article schema, and a home-page teaser; (2) an FAQ accordion on the distributor section; (3) real newsletter persistence via `/api/newsletter` + Subscriber model; (4) sitemap.xml + robots.ts SEO routes; (5) hardened the Prisma client against dev-time schema staleness.
+- New artifacts: `src/app/blog/page.tsx`, `src/app/blog/[slug]/page.tsx`, `src/components/site/BlogCard.tsx`, `src/components/site/FAQSection.tsx`, `src/app/api/newsletter/route.ts`, `src/app/sitemap.ts`, `src/app/robots.ts`, `scripts/seed-blog.ts`; updated `prisma/schema.prisma` (BlogPost + Subscriber), `src/lib/db.ts` (staleness guard), `src/data/site.ts` (NAV_LINKS + Blog, BLOG_HERO_IMAGE, BLOG_CATEGORIES, DISTRIBUTOR_FAQS), `src/app/page.tsx` (async + blog teaser), `src/app/gallery/page.tsx` (FAQ), `src/components/site/NewsletterForm.tsx` (real API), removed `public/robots.txt`.
+- Page count is now 6 top-level routes: `/`, `/about`, `/farming-activities`, `/products`, `/gallery`, `/blog` (plus dynamic `/blog/[slug]`). The original 5 required routes are unchanged.
+- Unresolved / risks: none blocking. Blog content is seeded (not editable via UI yet). The 4 older models (User, Post from the scaffold) are unused — could be cleaned up in a future round.
+- Next-phase priorities (for round 4): add a category filter + search to the blog listing, build a lightweight admin route (token-protected) to view ContactEnquiries + Subscribers and toggle enquiry status, add Next.js `placeholder="blur"` with generated blurDataURLs for the local images, add an OG image generation route (`opengraph-image.tsx`) for social sharing, add a "Recent enquiries" count badge somewhere, and consider a dedicated `/distributor` route split out of `/gallery`.

@@ -7,7 +7,9 @@ import { ProductCard } from "@/components/site/ProductCard";
 import { FeatureStrip } from "@/components/site/FeatureStrip";
 import { CTASection } from "@/components/site/CTASection";
 import { Testimonials } from "@/components/site/Testimonials";
+import { BlogCard } from "@/components/site/BlogCard";
 import { Reveal } from "@/components/site/Reveal";
+import { db } from "@/lib/db";
 import {
   ACTIVITIES,
   PRODUCTS,
@@ -19,9 +21,42 @@ import {
 } from "@/data/site";
 import { ArrowRight, CheckCircle2, Phone, Sprout, Leaf, ShieldCheck } from "lucide-react";
 
-export default function HomePage() {
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
   const featuredActivities = ACTIVITIES.slice(0, 12);
   const featuredProducts = PRODUCTS.slice(0, 5);
+
+  // Latest 3 blog posts for the blog teaser
+  let latestPosts: {
+    slug: string;
+    title: string;
+    excerpt: string;
+    category: string;
+    coverImage: string;
+    author: string;
+    readMinutes: number;
+    createdAt: Date;
+  }[] = [];
+  try {
+    latestPosts = await db.blogPost.findMany({
+      where: { published: true },
+      orderBy: { createdAt: "desc" },
+      take: 3,
+      select: {
+        slug: true,
+        title: true,
+        excerpt: true,
+        category: true,
+        coverImage: true,
+        author: true,
+        readMinutes: true,
+        createdAt: true,
+      },
+    });
+  } catch {
+    latestPosts = [];
+  }
 
   return (
     <>
@@ -253,8 +288,46 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ============ SECTION 5d: BLOG TEASER ============ */}
+      {latestPosts.length > 0 && (
+        <section className="bg-white py-20 sm:py-24" aria-label="Latest from the farm journal">
+          <div className="container-page">
+            <Reveal>
+              <SectionHeading
+                eyebrow="From The Farm Journal"
+                title="Latest From Our Blog"
+                subtitle="Guides, stories and honest notes on natural farming and seasonal produce."
+              />
+            </Reveal>
+            <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {latestPosts.map((post, i) => (
+                <Reveal key={post.slug} delay={(i % 3) * 90}>
+                  <BlogCard
+                    post={{
+                      slug: post.slug,
+                      title: post.title,
+                      excerpt: post.excerpt,
+                      category: post.category,
+                      coverImage: post.coverImage,
+                      author: post.author,
+                      readMinutes: post.readMinutes,
+                      createdAt: post.createdAt,
+                    }}
+                  />
+                </Reveal>
+              ))}
+            </div>
+            <div className="mt-10 flex justify-center">
+              <Button href="/blog" variant="outline" size="lg" withArrow>
+                Read All Articles
+              </Button>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ============ SECTION 6: DISTRIBUTOR CTA ============ */}
-      <section className="bg-white py-16 sm:py-20" aria-label="Become a distributor">
+      <section className="bg-cream py-16 sm:py-20" aria-label="Become a distributor">
         <CTASection />
       </section>
     </>

@@ -1,0 +1,242 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
+import { db } from "@/lib/db";
+import { Button } from "@/components/site/Button";
+import { BlogCard } from "@/components/site/BlogCard";
+import { Reveal } from "@/components/site/Reveal";
+import { Calendar, Clock, ArrowLeft, ArrowRight, Leaf, Tag } from "lucide-react";
+
+export const dynamic = "force-dynamic";
+
+type Params = Promise<{ slug: string }>;
+
+// Pre-render the known slugs at build, but still allow dynamic ones
+export async function generateStaticParams() {
+  const posts = await db.blogPost.findMany({
+    where: { published: true },
+    select: { slug: true },
+  });
+  return posts.map((p) => ({ slug: p.slug }));
+}
+
+export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await db.blogPost.findUnique({ where: { slug } });
+  if (!post) {
+    return { title: "Article Not Found" };
+  }
+  return {
+    title: post.title,
+    description: post.excerpt,
+    openGraph: {
+      title: post.title,
+      description: post.excerpt,
+      type: "article",
+      publishedTime: post.createdAt.toISOString(),
+      authors: [post.author],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt,
+    },
+  };
+}
+
+function formatDate(d: Date) {
+  return d.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+// Very small markdown-ish renderer: ## headings, paragraphs, lists handled as paragraphs.
+function renderContent(content: string) {
+  const blocks = content.trim().split(/\n\n+/);
+  return blocks.map((block, i) => {
+    const trimmed = block.trim();
+    if (trimmed.startsWith("## ")) {
+      return (
+        <h2 key={i} className="mt-8 text-xl font-bold text-forest sm:text-2xl">
+          {trimmed.replace(/^##\s+/, "")}
+        </h2>
+      );
+    }
+    if (trimmed.startsWith("# ")) {
+      return (
+        <h1 key={i} className="mt-8 text-2xl font-extrabold text-forest sm:text-3xl">
+          {trimmed.replace(/^#\s+/, "")}
+        </h1>
+      );
+    }
+    return (
+      <p key={i} className="mt-4 text-base leading-relaxed text-ink/80 sm:text-lg">
+        {trimmed}
+      </p>
+    );
+  });
+}
+
+export default async function BlogDetailPage({ params }: { params: Params }) {
+  const { slug } = await params;
+  const post = await db.blogPost.findUnique({ where: { slug } });
+
+  if (!post || !post.published) {
+    notFound();
+  }
+
+  // Related posts (same category, exclude current), fallback to any others.
+  const relatedRaw = await db.blogPost.findMany({
+    where: { published: true, slug: { not: slug }, category: post.category },
+    take: 3,
+    orderBy: { createdAt: "desc" },
+  });
+  const related =
+    relatedRaw.length > 0
+      ? relatedRaw
+      : await db.blogPost.findMany({
+          where: { published: true, slug: { not: slug } },
+          take: 3,
+          orderBy: { createdAt: "desc" },
+        });
+
+  // JSON-LD for the article
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.excerpt,
+    image: post.coverImage,
+    datePublished: post.createdAt.toISOString(),
+    author: { "@type": "Organization", name: post.author },
+    publisher: { "@type": "Organization", name: "Mahindra Integrated Farm" },
+    articleSection: post.category,
+  };
+
+  return (
+    <article className="bg-cream">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      {/* Hero header */}
+      <header className="relative isolate overflow-hidden bg-darkgreen pt-16 pb-20 text-white sm:pt-20 sm:pb-24">
+        <div className="absolute inset-0 -z-10">
+          <Image
+            src={post.coverImage}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-darkgreen/90 via-darkgreen/80 to-forest/90" />
+        </div>
+        <div className="container-page">
+          <div className="mx-auto max-w-3xl text-center">
+            <Link
+              href="/blog"
+              className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-lightgreen ring-1 ring-white/15 backdrop-blur transition-colors hover:bg-white/20"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Back to Blog
+            </Link>
+            <span className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-lightgreen ring-1 ring-white/15">
+              <Tag className="h-3 w-3" />
+              {post.category}
+            </span>
+            <h1 className="mt-4 text-balance text-3xl font-extrabold leading-[1.12] tracking-tight sm:text-4xl lg:text-5xl">
+              {post.title}
+            </h1>
+            <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-cream/85 sm:text-lg">
+              {post.excerpt}
+            </p>
+            <div className="mt-6 flex items-center justify-center gap-4 text-xs font-medium uppercase tracking-wide text-cream/70">
+              <span className="inline-flex items-center gap-1.5">
+                <Calendar className="h-4 w-4" />
+                {formatDate(post.createdAt)}
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Clock className="h-4 w-4" />
+                {post.readMinutes} min read
+              </span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Body */}
+      <div className="container-page py-14 sm:py-16">
+        <div className="mx-auto max-w-3xl">
+          <div className="rounded-3xl bg-white p-6 shadow-soft ring-1 ring-black/5 sm:p-10">
+            {renderContent(post.content)}
+          </div>
+
+          {/* Share / author card */}
+          <div className="mt-8 flex flex-col items-start justify-between gap-4 rounded-3xl bg-forest p-6 text-white sm:flex-row sm:items-center">
+            <div className="flex items-center gap-3">
+              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-lightgreen text-forest">
+                <Leaf className="h-6 w-6" />
+              </span>
+              <div>
+                <p className="text-sm font-bold">{post.author}</p>
+                <p className="text-xs text-cream/70">Mahindra Integrated Farm</p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button href="/blog" variant="light" size="md">
+                <ArrowLeft className="h-4 w-4" />
+                All Articles
+              </Button>
+              <Button href="/gallery#contact" variant="primary" size="md" withArrow>
+                Talk To Us
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Related posts */}
+      {related.length > 0 && (
+        <section className="bg-white py-16 sm:py-20" aria-label="Related articles">
+          <div className="container-page">
+            <Reveal>
+              <div className="flex flex-col items-center text-center">
+                <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-mediumgreen">
+                  <Leaf className="h-3.5 w-3.5" />
+                  Keep Reading
+                </span>
+                <h2 className="mt-3 text-2xl font-extrabold uppercase tracking-tight text-forest sm:text-3xl">
+                  Related Articles
+                </h2>
+                <span className="mt-2 h-1 w-16 rounded-full bg-mediumgreen" />
+              </div>
+            </Reveal>
+            <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {related.map((p, i) => (
+                <Reveal key={p.id} delay={(i % 3) * 90}>
+                  <BlogCard
+                    post={{
+                      slug: p.slug,
+                      title: p.title,
+                      excerpt: p.excerpt,
+                      category: p.category,
+                      coverImage: p.coverImage,
+                      author: p.author,
+                      readMinutes: p.readMinutes,
+                      createdAt: p.createdAt,
+                    }}
+                  />
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+    </article>
+  );
+}

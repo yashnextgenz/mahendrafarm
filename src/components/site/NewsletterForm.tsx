@@ -2,15 +2,17 @@
 
 import { useState, type FormEvent } from "react";
 import { cn } from "@/lib/utils";
-import { Mail, CheckCircle2, Loader2, Send } from "lucide-react";
+import { Mail, CheckCircle2, Loader2, Send, AlertCircle } from "lucide-react";
 
 export function NewsletterForm({ className }: { className?: string }) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | undefined>();
-  const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
+    setServerError(null);
     if (!email.trim()) {
       setError("Please enter your email");
       return;
@@ -21,10 +23,28 @@ export function NewsletterForm({ className }: { className?: string }) {
     }
     setError(undefined);
     setStatus("loading");
-    await new Promise((r) => setTimeout(r, 800));
-    setStatus("success");
-    setEmail("");
-    setTimeout(() => setStatus("idle"), 4000);
+    try {
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, source: "footer" }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+      };
+      if (res.ok && data.ok) {
+        setStatus("success");
+        setEmail("");
+        setTimeout(() => setStatus("idle"), 5000);
+      } else {
+        setStatus("error");
+        setServerError(data.error ?? "Could not subscribe. Please try again.");
+      }
+    } catch {
+      setStatus("error");
+      setServerError("Network error. Please try again.");
+    }
   };
 
   return (
@@ -68,11 +88,18 @@ export function NewsletterForm({ className }: { className?: string }) {
       </form>
       {error && <p className="mt-2 text-xs text-red-300">{error}</p>}
       {status === "success" && (
-        <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-lightgreen">
+        <p role="status" className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-lightgreen">
           <CheckCircle2 className="h-3.5 w-3.5" />
           Subscribed! Watch for farm updates in your inbox.
+        </p>
+      )}
+      {status === "error" && serverError && (
+        <p role="alert" className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-red-300">
+          <AlertCircle className="h-3.5 w-3.5" />
+          {serverError}
         </p>
       )}
     </div>
   );
 }
+
