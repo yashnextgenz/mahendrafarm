@@ -1,15 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { db } from "@/lib/db";
 import { PageHero } from "@/components/site/PageHero";
 import { Reveal } from "@/components/site/Reveal";
 import {
   ACTIVITIES,
   PRODUCTS,
   GALLERY_FILTERS,
-  NAV_LINKS,
-  FOOTER_ACTIVITIES,
   BLOG_CATEGORIES,
+  BLOG_POSTS,
   BLOG_HERO_IMAGE,
 } from "@/data/site";
 import {
@@ -24,7 +22,6 @@ import {
   Search as SearchIcon,
   HelpCircle,
   ShieldCheck,
-  Lock,
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -32,8 +29,6 @@ export const metadata: Metadata = {
   description:
     "A complete map of every page on the Mahindra Integrated Farm website — pages, products, activities, blog categories and more.",
 };
-
-export const dynamic = "force-dynamic";
 
 const MAIN_PAGES = [
   { href: "/", label: "Home", Icon: Home, desc: "Our story at a glance — hero, activities, products, why choose us and testimonials." },
@@ -43,24 +38,17 @@ const MAIN_PAGES = [
   { href: "/gallery", label: "Gallery", Icon: ImageIcon, desc: "Photo gallery, distributor network information and contact form." },
   { href: "/blog", label: "Blog", Icon: Newspaper, desc: "Stories, guides and insights on natural farming and seasonal produce." },
   { href: "/distributor", label: "Distributor", Icon: Network, desc: "Become a distributor — benefits, starter kit, process, regions and FAQ." },
+  { href: "/careers", label: "Careers", Icon: Package, desc: "Open positions and how to join the Mahindra Integrated Farm team." },
   { href: "/search", label: "Search", Icon: SearchIcon, desc: "Search across our blog, products and farming activities." },
   { href: "/faq", label: "FAQ", Icon: HelpCircle, desc: "Frequently asked questions about products, orders and the distributor program." },
   { href: "/privacy", label: "Privacy Policy", Icon: ShieldCheck, desc: "How we handle your data, cookies and contact enquiries." },
-  { href: "/admin", label: "Admin", Icon: Lock, desc: "Staff dashboard for enquiries and subscribers (token-protected)." },
 ];
 
-export default async function SiteIndexPage() {
-  // Fetch blog posts for the index
-  let posts: { slug: string; title: string; category: string }[] = [];
-  try {
-    posts = await db.blogPost.findMany({
-      where: { published: true },
-      orderBy: { createdAt: "desc" },
-      select: { slug: true, title: true, category: true },
-    });
-  } catch {
-    posts = [];
-  }
+export default function SiteIndexPage() {
+  // Blog posts for the index (static data)
+  const posts = BLOG_POSTS.filter((p) => p.published)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .map((p) => ({ slug: p.slug, title: p.title, category: p.category }));
 
   return (
     <>

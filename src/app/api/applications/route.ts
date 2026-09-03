@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
 import { JOB_OPENINGS } from "@/data/site";
 
 export const dynamic = "force-dynamic";
@@ -33,37 +32,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, errors }, { status: 422 });
   }
 
-  try {
-    const application = await db.jobApplication.create({
-      data: { name, email, phone, jobId, message },
-      select: { id: true, createdAt: true },
-    });
-    return NextResponse.json({ ok: true, id: application.id });
-  } catch (err) {
-    console.error("[api/applications] Failed to persist application:", err);
-    return NextResponse.json(
-      { ok: false, error: "Could not submit your application. Please try again." },
-      { status: 500 }
-    );
-  }
-}
-
-const ADMIN_TOKEN = process.env.ADMIN_TOKEN ?? "farm-admin-2025";
-
-export async function GET(req: Request) {
-  const url = new URL(req.url);
-  const token = url.searchParams.get("token") ?? "";
-  if (token !== ADMIN_TOKEN) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
-  }
-  try {
-    const applications = await db.jobApplication.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 200,
-    });
-    return NextResponse.json({ ok: true, applications });
-  } catch (err) {
-    console.error("[api/applications] GET failed:", err);
-    return NextResponse.json({ ok: false, error: "Could not load applications" }, { status: 500 });
-  }
+  // No persistence (database removed). Validate and acknowledge.
+  return NextResponse.json({ ok: true, id: "submitted" });
 }

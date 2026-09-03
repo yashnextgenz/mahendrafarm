@@ -1,9 +1,7 @@
 import type { MetadataRoute } from "next";
-import { db } from "@/lib/db";
+import { BLOG_POSTS } from "@/data/site";
 
 const BASE = "https://mahindraintegratedfarm.example";
-
-export const dynamic = "force-dynamic";
 
 const CATEGORY_SLUGS = [
   "sustainability",
@@ -14,7 +12,7 @@ const CATEGORY_SLUGS = [
   "distributor-network",
 ];
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes: MetadataRoute.Sitemap = [
     "",
     "/about",
@@ -42,19 +40,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  try {
-    const posts = await db.blogPost.findMany({
-      where: { published: true },
-      select: { slug: true, updatedAt: true },
-    });
-    const blogRoutes: MetadataRoute.Sitemap = posts.map((p) => ({
-      url: `${BASE}/blog/${p.slug}`,
-      lastModified: p.updatedAt,
-      changeFrequency: "monthly" as const,
-      priority: 0.6,
-    }));
-    return [...staticRoutes, ...categoryRoutes, ...blogRoutes];
-  } catch {
-    return [...staticRoutes, ...categoryRoutes];
-  }
+  const blogRoutes: MetadataRoute.Sitemap = BLOG_POSTS.filter((p) => p.published).map((p) => ({
+    url: `${BASE}/blog/${p.slug}`,
+    lastModified: p.updatedAt,
+    changeFrequency: "monthly" as const,
+    priority: 0.6,
+  }));
+
+  return [...staticRoutes, ...categoryRoutes, ...blogRoutes];
 }

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { db } from "@/lib/db";
 import { Button } from "@/components/site/Button";
 import { BlogCard } from "@/components/site/BlogCard";
 import { ProductCard } from "@/components/site/ProductCard";
@@ -11,25 +10,19 @@ import { ReadingProgress } from "@/components/site/ReadingProgress";
 import { PrintButton } from "@/components/site/PrintButton";
 import { ShareButtons } from "@/components/site/ShareButtons";
 import { TableOfContents, type TocItem } from "@/components/site/TableOfContents";
-import { PRODUCTS } from "@/data/site";
+import { PRODUCTS, BLOG_POSTS } from "@/data/site";
 import { Calendar, Clock, ArrowLeft, ArrowRight, Leaf, Tag } from "lucide-react";
-
-export const dynamic = "force-dynamic";
 
 type Params = Promise<{ slug: string }>;
 
-// Pre-render the known slugs at build, but still allow dynamic ones
-export async function generateStaticParams() {
-  const posts = await db.blogPost.findMany({
-    where: { published: true },
-    select: { slug: true },
-  });
-  return posts.map((p) => ({ slug: p.slug }));
+// Pre-render the known slugs at build time (static data).
+export function generateStaticParams() {
+  return BLOG_POSTS.filter((p) => p.published).map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
-  const post = await db.blogPost.findUnique({ where: { slug } });
+  const post = BLOG_POSTS.find((p) => p.slug === slug);
   if (!post) {
     return { title: "Article Not Found" };
   }
@@ -40,7 +33,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
       title: post.title,
       description: post.excerpt,
       type: "article",
-      publishedTime: post.createdAt.toISOString(),
+      publishedTime: post.createdAt,
       authors: [post.author],
     },
     twitter: {
@@ -51,8 +44,9 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   };
 }
 
-function formatDate(d: Date) {
-  return d.toLocaleDateString("en-IN", {
+function formatDate(d: Date | string) {
+  const date = typeof d === "string" ? new Date(d) : d;
+  return date.toLocaleDateString("en-IN", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -108,26 +102,24 @@ function renderContent(content: string): RenderedContent {
 
 export default async function BlogDetailPage({ params }: { params: Params }) {
   const { slug } = await params;
-  const post = await db.blogPost.findUnique({ where: { slug } });
+  const post = BLOG_POSTS.find((p) => p.slug === slug);
 
   if (!post || !post.published) {
     notFound();
   }
 
   // Related posts (same category, exclude current), fallback to any others.
-  const relatedRaw = await db.blogPost.findMany({
-    where: { published: true, slug: { not: slug }, category: post.category },
-    take: 3,
-    orderBy: { createdAt: "desc" },
-  });
+  const relatedRaw = BLOG_POSTS.filter(
+    (p) => p.published && p.slug !== slug && p.category === post.category
+  )
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 3);
   const related =
     relatedRaw.length > 0
       ? relatedRaw
-      : await db.blogPost.findMany({
-          where: { published: true, slug: { not: slug } },
-          take: 3,
-          orderBy: { createdAt: "desc" },
-        });
+      : BLOG_POSTS.filter((p) => p.published && p.slug !== slug)
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .slice(0, 3);
 
   // JSON-LD for the article
   const jsonLd = {
@@ -136,7 +128,7 @@ export default async function BlogDetailPage({ params }: { params: Params }) {
     headline: post.title,
     description: post.excerpt,
     image: post.coverImage,
-    datePublished: post.createdAt.toISOString(),
+    datePublished: post.createdAt,
     author: { "@type": "Organization", name: post.author },
     publisher: { "@type": "Organization", name: "Mahindra Integrated Farm" },
     articleSection: post.category,

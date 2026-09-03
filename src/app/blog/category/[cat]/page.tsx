@@ -1,15 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { db } from "@/lib/db";
 import { PageHero } from "@/components/site/PageHero";
 import { BlogCard } from "@/components/site/BlogCard";
 import { Reveal } from "@/components/site/Reveal";
 import { Button } from "@/components/site/Button";
-import { BLOG_HERO_IMAGE } from "@/data/site";
+import { BLOG_HERO_IMAGE, BLOG_POSTS } from "@/data/site";
 import { ArrowLeft, ArrowRight, Leaf } from "lucide-react";
-
-export const dynamic = "force-dynamic";
 
 type Params = Promise<{ cat: string }>;
 
@@ -23,16 +20,7 @@ const CATEGORY_SLUGS: Record<string, string> = {
   "distributor-network": "Distributor Network",
 };
 
-// Inverse lookup: category name → slug
-const TO_SLUG: Record<string, string> = Object.entries(CATEGORY_SLUGS).reduce(
-  (acc, [slug, name]) => {
-    acc[name] = slug;
-    return acc;
-  },
-  {} as Record<string, string>
-);
-
-export async function generateStaticParams() {
+export function generateStaticParams() {
   return Object.keys(CATEGORY_SLUGS).map((slug) => ({ cat: slug }));
 }
 
@@ -60,10 +48,9 @@ export default async function BlogCategoryPage({ params }: { params: Params }) {
   const category = resolveCategory(cat);
   if (!category) notFound();
 
-  const posts = await db.blogPost.findMany({
-    where: { published: true, category },
-    orderBy: { createdAt: "desc" },
-  });
+  const posts = BLOG_POSTS.filter((p) => p.published && p.category === category).sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
 
   const plainPosts = posts.map((p) => ({
     slug: p.slug,

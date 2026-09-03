@@ -1,14 +1,13 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { db } from "@/lib/db";
 import { PageHero } from "@/components/site/PageHero";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { BlogCard } from "@/components/site/BlogCard";
 import { BlogExplorer } from "@/components/site/BlogExplorer";
 import { Reveal } from "@/components/site/Reveal";
 import { Button } from "@/components/site/Button";
-import { BLOG_HERO_IMAGE } from "@/data/site";
+import { BLOG_HERO_IMAGE, BLOG_POSTS } from "@/data/site";
 import { ArrowRight, Calendar, Clock, Leaf, Flame, Tag, Search } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -16,9 +15,6 @@ export const metadata: Metadata = {
   description:
     "Stories, guides and insights on natural farming, sustainable agriculture, seasonal produce and life at Mahindra Integrated Farm.",
 };
-
-// Always read fresh posts
-export const dynamic = "force-dynamic";
 
 function formatDate(d: Date | string) {
   const date = typeof d === "string" ? new Date(d) : d;
@@ -29,11 +25,10 @@ function formatDate(d: Date | string) {
   });
 }
 
-export default async function BlogPage() {
-  const posts = await db.blogPost.findMany({
-    where: { published: true },
-    orderBy: { createdAt: "desc" },
-  });
+export default function BlogPage() {
+  const posts = [...BLOG_POSTS]
+    .filter((p) => p.published)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   const featured = posts.filter((p) => p.featured).slice(0, 1)[0] ?? posts[0];
   const explorerPosts = posts

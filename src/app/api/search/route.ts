@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { ACTIVITIES, PRODUCTS } from "@/data/site";
+import { ACTIVITIES, PRODUCTS, BLOG_POSTS } from "@/data/site";
 
 export const dynamic = "force-dynamic";
 
@@ -17,39 +16,24 @@ export async function GET(req: Request) {
     });
   }
 
-  // Blog posts from DB
-  let blog: {
-    type: "blog";
-    title: string;
-    excerpt: string;
-    href: string;
-    category: string;
-  }[] = [];
-  try {
-    const posts = await db.blogPost.findMany({
-      where: {
-        published: true,
-        OR: [
-          { title: { contains: q } },
-          { excerpt: { contains: q } },
-          { content: { contains: q } },
-          { category: { contains: q } },
-        ],
-      },
-      take: 8,
-      orderBy: { createdAt: "desc" },
-      select: { slug: true, title: true, excerpt: true, category: true },
-    });
-    blog = posts.map((p) => ({
+  // Blog posts from static data
+  const blog = BLOG_POSTS.filter((p) => {
+    if (!p.published) return false;
+    return (
+      p.title.toLowerCase().includes(q) ||
+      p.excerpt.toLowerCase().includes(q) ||
+      p.content.toLowerCase().includes(q) ||
+      p.category.toLowerCase().includes(q)
+    );
+  })
+    .slice(0, 8)
+    .map((p) => ({
       type: "blog" as const,
       title: p.title,
       excerpt: p.excerpt,
       href: `/blog/${p.slug}`,
       category: p.category,
     }));
-  } catch {
-    blog = [];
-  }
 
   // Products from static data
   const products = PRODUCTS.filter(

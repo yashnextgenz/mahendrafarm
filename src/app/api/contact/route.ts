@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^[+]?[\d\s-]{7,15}$/;
@@ -40,28 +39,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, errors }, { status: 422 });
   }
 
-  try {
-    const enquiry = await db.contactEnquiry.create({
-      data: { name, email, phone, interest, message },
-      select: { id: true, createdAt: true },
-    });
-    return NextResponse.json({ ok: true, id: enquiry.id });
-  } catch (err) {
-    console.error("[api/contact] Failed to persist enquiry:", err);
-    return NextResponse.json(
-      { ok: false, error: "Could not submit your enquiry. Please try again." },
-      { status: 500 }
-    );
-  }
-}
-
-export async function GET() {
-  try {
-    const total = await db.contactEnquiry.count();
-    const newCount = await db.contactEnquiry.count({ where: { status: "new" } });
-    return NextResponse.json({ ok: true, total, new: newCount });
-  } catch (err) {
-    console.error("[api/contact] GET failed:", err);
-    return NextResponse.json({ ok: false, error: "Unable to fetch counts" }, { status: 500 });
-  }
+  // No persistence (database removed). Validate and acknowledge.
+  return NextResponse.json({ ok: true, id: "submitted" });
 }

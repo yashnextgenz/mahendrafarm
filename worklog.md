@@ -380,3 +380,41 @@ Stage Summary:
 - Page/route count unchanged: 13 top-level routes + dynamic blog + category + opengraph-image + not-found + error + loading states + 6 API route groups (contact, contact/list, contact/[id], newsletter, search, applications, applications/[id]).
 - Unresolved / risks: none blocking. The dev server needed a reload after the Prisma schema push — the `db.ts` staleness guard from round 3 handles this automatically on next import, but a running process still needs a config-touch reload.
 - Next-phase priorities (for round 12): add Next.js blur placeholders for the local images, add a reading-time badge to the blog hero, add a /team page for the farm's people, add a CSV export button to the admin dashboard (enquiries + applications), add a "recent activity" timeline widget to the admin, and add a webhook/notification stub for new high-priority enquiries.
+
+---
+Task ID: 12
+Agent: main (Z.ai Code)
+Task: Remove all Prisma and database-related code. Convert the site to use static data + validation-only APIs (no persistence).
+
+Work Log:
+- Added a static `BLOG_POSTS` array (6 posts with full content, categories, dates) to `src/data/site.ts`, replacing the Prisma `BlogPost` model. The seeded blog content from `scripts/seed-blog.ts` was moved verbatim into static data with ISO date strings.
+- Converted all blog pages to read from `BLOG_POSTS` instead of `db.blogPost`:
+  - `src/app/blog/page.tsx` — listing now filters/sorts the static array (no async, no `db` import, no `force-dynamic`).
+  - `src/app/blog/[slug]/page.tsx` — `generateStaticParams` + `generateMetadata` + the page body now find/filter the static array; related posts computed from static data; JSON-LD uses ISO date strings.
+  - `src/app/blog/category/[cat]/page.tsx` — filters the static array by category.
+  - `src/app/blog/[slug]/opengraph-image.tsx` — reads the post title/category/excerpt from static data instead of `db.blogPost.findUnique`.
+  - `src/app/page.tsx` (home) — the blog teaser now slices the static array (sync component, no `db` import, no `force-dynamic`).
+  - `src/app/site-map/page.tsx` — lists blog posts from the static array; removed the `/admin` link from the MAIN_PAGES list; removed the `Lock` icon import and the `force-dynamic` export.
+- Converted the search API (`src/app/api/search/route.ts`) to search the static `BLOG_POSTS` array (title/excerpt/content/category) plus the existing static `PRODUCTS` and `ACTIVITIES`. No `db` import.
+- Converted the form-submission APIs to validate-only (no persistence):
+  - `src/app/api/contact/route.ts` — `POST` validates all fields server-side and returns `{ok:true, id:"submitted"}`. Removed the `GET` (counts) and the `db.contactEnquiry` persistence.
+  - `src/app/api/newsletter/route.ts` — `POST` validates email and returns `{ok:true, created:true}`. Removed the `GET` (counts) and the `db.subscriber` persistence.
+  - `src/app/api/applications/route.ts` — `POST` validates all fields + jobId allowlist and returns `{ok:true, id:"submitted"}`. Removed the `GET` (admin list) and the `db.jobApplication` persistence.
+  - Removed `src/app/api/contact/list/route.ts`, `src/app/api/contact/[id]/route.ts`, and `src/app/api/applications/[id]/route.ts` (these were admin/DB-only routes for listing, status updates, and deletes).
+- Removed the `/admin` dashboard entirely (it was DB-only — viewing enquiries, subscribers, and job applications with status management + delete). Deleted `src/app/admin/page.tsx` and `src/app/admin/loading.tsx`. The `/admin` route now returns the branded 404 page.
+- Converted `src/app/sitemap.ts` to a fully static function (no `force-dynamic`, no `db`) — emits all 12 static routes + 6 category routes + 6 blog slugs from `BLOG_POSTS`.
+- Deleted all Prisma/database artifacts:
+  - `prisma/schema.prisma` (the whole prisma directory is gone).
+  - `src/lib/db.ts` (the PrismaClient singleton + staleness guard).
+  - `scripts/seed-blog.ts` (the DB seeding script).
+  - `db/` directory (the SQLite `custom.db` file).
+  - Removed `db:push`, `db:generate`, `db:migrate`, `db:reset` scripts from `package.json`.
+  - Removed `@prisma/client` and `prisma` from `package.json` dependencies.
+  - Cleared `DATABASE_URL` from `.env`.
+- Final QA: `bun run lint` clean; all 16 valid routes return 200 (`, `/about`, `/farming-activities`, `/products`, `/gallery`, `/blog`, `/blog/category/dairy`, `/blog/why-natural-farming-matters`, `/distributor`, `/search`, `/privacy`, `/faq`, `/site-map`, `/careers`, `/sitemap.xml`, `/robots.txt`); `/admin` now returns 404; `/this-page-does-not-exist` returns 404; the contact/newsletter/applications POST APIs validate and return `{ok:true}` (no DB); the search API returns results from static data; blog listing renders all 6 posts; blog detail renders title/body/related-widget; mobile 390px no overflow on blog listing + detail.
+
+Stage Summary:
+- Removed all Prisma and database-related code from the project. The site is now fully database-free: blog posts are static data in `src/data/site.ts`, and the contact/newsletter/job-application forms POST to validate-only API routes that acknowledge without persisting. The admin dashboard and all admin/DB API routes (contact/list, contact/[id], applications/[id]) were removed. The Prisma schema, db client, seed script, SQLite db file, db npm scripts, and @prisma/client/prisma dependencies are all deleted.
+- The site's user-facing functionality is unchanged: 12 top-level routes all render (was 13 incl. /admin; /admin removed), forms still validate and show success states, blog/search/category/sitemap all work from static data, all JSON-LD structured data is preserved.
+- Page count is now 12 top-level routes (no `/admin`): `/`, `/about`, `/farming-activities`, `/products`, `/gallery`, `/blog`, `/distributor`, `/search`, `/privacy`, `/faq`, `/site-map`, `/careers` + dynamic `/blog/[slug]`, `/blog/category/[cat]`, `opengraph-image`, `not-found`, `error`, loading states.
+- Unresolved / risks: none blocking. The forms no longer persist anywhere — to restore persistence in the future, wire the POST routes to an external service (email, a managed DB, or a third-party form backend). The original 5 required routes are unchanged and intact.

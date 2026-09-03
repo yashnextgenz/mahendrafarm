@@ -9,7 +9,6 @@ import { CTASection } from "@/components/site/CTASection";
 import { Testimonials } from "@/components/site/Testimonials";
 import { BlogCard } from "@/components/site/BlogCard";
 import { Reveal } from "@/components/site/Reveal";
-import { db } from "@/lib/db";
 import {
   ACTIVITIES,
   PRODUCTS,
@@ -18,45 +17,28 @@ import {
   WHY_CHOOSE_POINTS,
   STATS,
   SITE,
+  BLOG_POSTS,
 } from "@/data/site";
 import { ArrowRight, CheckCircle2, Phone, Sprout, Leaf, ShieldCheck } from "lucide-react";
 
-export const dynamic = "force-dynamic";
-
-export default async function HomePage() {
+export default function HomePage() {
   const featuredActivities = ACTIVITIES.slice(0, 12);
   const featuredProducts = PRODUCTS.slice(0, 5);
 
-  // Latest 3 blog posts for the blog teaser
-  let latestPosts: {
-    slug: string;
-    title: string;
-    excerpt: string;
-    category: string;
-    coverImage: string;
-    author: string;
-    readMinutes: number;
-    createdAt: Date;
-  }[] = [];
-  try {
-    latestPosts = await db.blogPost.findMany({
-      where: { published: true },
-      orderBy: { createdAt: "desc" },
-      take: 3,
-      select: {
-        slug: true,
-        title: true,
-        excerpt: true,
-        category: true,
-        coverImage: true,
-        author: true,
-        readMinutes: true,
-        createdAt: true,
-      },
-    });
-  } catch {
-    latestPosts = [];
-  }
+  // Latest 3 blog posts for the blog teaser (static data)
+  const latestPosts = BLOG_POSTS.filter((p) => p.published)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 3)
+    .map((p) => ({
+      slug: p.slug,
+      title: p.title,
+      excerpt: p.excerpt,
+      category: p.category,
+      coverImage: p.coverImage,
+      author: p.author,
+      readMinutes: p.readMinutes,
+      createdAt: p.createdAt,
+    }));
 
   return (
     <>

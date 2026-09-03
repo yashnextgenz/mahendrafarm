@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { db } from "@/lib/db";
+import { BLOG_POSTS } from "@/data/site";
 
 export const runtime = "nodejs";
 export const alt = "Mahindra Integrated Farm — Blog";
@@ -12,15 +12,11 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   let category = "Mahindra Integrated Farm";
   let excerpt = "Stories from the farm";
 
-  try {
-    const post = await db.blogPost.findUnique({ where: { slug } });
-    if (post) {
-      title = post.title;
-      category = post.category;
-      excerpt = post.excerpt.slice(0, 120) + (post.excerpt.length > 120 ? "…" : "");
-    }
-  } catch {
-    /* fall back to defaults */
+  const post = BLOG_POSTS.find((p) => p.slug === slug);
+  if (post) {
+    title = post.title;
+    category = post.category;
+    excerpt = post.excerpt.slice(0, 120) + (post.excerpt.length > 120 ? "…" : "");
   }
 
   return new ImageResponse(
