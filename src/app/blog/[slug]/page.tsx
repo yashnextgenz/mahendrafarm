@@ -142,6 +142,33 @@ export default async function BlogDetailPage({ params }: { params: Params }) {
     articleSection: post.category,
   };
 
+  // BreadcrumbList JSON-LD for the article (Home > Blog > [Category] > Article)
+  const categorySlug = post.category
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-");
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://mahindraintegratedfarm.example" },
+      { "@type": "ListItem", position: 2, name: "Blog", item: "https://mahindraintegratedfarm.example/blog" },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: post.category,
+        item: `https://mahindraintegratedfarm.example/blog/category/${categorySlug}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 4,
+        name: post.title,
+        item: `https://mahindraintegratedfarm.example/blog/${post.slug}`,
+      },
+    ],
+  };
+
   // Render article body once (extracts TOC items from headings).
   const { nodes: renderedBody, toc } = renderContent(post.content);
 
@@ -151,6 +178,10 @@ export default async function BlogDetailPage({ params }: { params: Params }) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
 
       {/* Hero header */}
@@ -168,6 +199,16 @@ export default async function BlogDetailPage({ params }: { params: Params }) {
         </div>
         <div className="container-page">
           <div className="mx-auto max-w-3xl text-center">
+            {/* Breadcrumb */}
+            <nav aria-label="Breadcrumb" className="mb-4 flex flex-wrap items-center justify-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-cream/60">
+              <Link href="/" className="transition-colors hover:text-lightgreen">Home</Link>
+              <span aria-hidden>/</span>
+              <Link href="/blog" className="transition-colors hover:text-lightgreen">Blog</Link>
+              <span aria-hidden>/</span>
+              <Link href={`/blog/category/${categorySlug}`} className="transition-colors hover:text-lightgreen">
+                {post.category}
+              </Link>
+            </nav>
             <Link
               href="/blog"
               className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-lightgreen ring-1 ring-white/15 backdrop-blur transition-colors hover:bg-white/20"

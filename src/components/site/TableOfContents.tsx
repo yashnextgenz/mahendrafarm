@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { ArrowUp } from "lucide-react";
 
 export type TocItem = { id: string; text: string };
 
@@ -75,6 +76,17 @@ export function TableOfContents({ items }: { items: TocItem[] }) {
             </li>
           ))}
         </ul>
+        <button
+          type="button"
+          onClick={() => {
+            const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+            window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+          }}
+          className="mt-4 inline-flex items-center gap-1.5 border-t border-border pt-3 text-xs font-bold uppercase tracking-wide text-mediumgreen transition-colors hover:text-forest"
+        >
+          <ArrowUp className="h-3.5 w-3.5" />
+          Back to top
+        </button>
       </div>
     </nav>
   );

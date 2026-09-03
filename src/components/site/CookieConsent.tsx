@@ -9,6 +9,12 @@ const STORAGE_KEY = "mif-cookie-consent";
 type Consent = "accepted" | "rejected";
 
 /**
+ * Custom event name used by the footer "Cookie preferences" button to ask
+ * this banner to re-open without a page reload.
+ */
+export const COOKIE_REOPEN_EVENT = "mif:reopen-cookie-consent";
+
+/**
  * Returns whether consent has already been recorded. Used as a lazy initial
  * state so we don't need to setState synchronously inside an effect.
  */
@@ -33,6 +39,16 @@ export function CookieConsent() {
     const t = setTimeout(() => setShow(true), 1200);
     return () => clearTimeout(t);
   }, [remaining]);
+
+  // Listen for the footer "Cookie preferences" button to re-open the banner.
+  useEffect(() => {
+    const onReopen = () => {
+      setShow(true);
+      setRemaining(true);
+    };
+    window.addEventListener(COOKIE_REOPEN_EVENT, onReopen);
+    return () => window.removeEventListener(COOKIE_REOPEN_EVENT, onReopen);
+  }, []);
 
   const decide = (value: Consent) => {
     try {
@@ -67,8 +83,8 @@ export function CookieConsent() {
           <p className="mt-1 text-xs leading-relaxed text-ink/60">
             We use essential cookies to run this site and optional analytics to understand
             what content you enjoy. You can choose what to allow. See our{" "}
-            <a href="/about" className="font-semibold text-mediumgreen underline-offset-2 hover:underline">
-              privacy approach
+            <a href="/privacy" className="font-semibold text-mediumgreen underline-offset-2 hover:underline">
+              privacy policy
             </a>{" "}
             for details.
           </p>

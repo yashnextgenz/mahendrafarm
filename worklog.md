@@ -281,3 +281,35 @@ Stage Summary:
 - Page count is now 11 top-level routes: `/`, `/about`, `/farming-activities`, `/products`, `/gallery`, `/blog`, `/distributor`, `/search`, `/privacy`, `/faq`, `/admin` (plus dynamic `/blog/[slug]`, `/blog/category/[cat]`, `opengraph-image`, `not-found`, `error`, loading states). The original 5 required routes are unchanged and intact.
 - Unresolved / risks: none blocking. The error boundary only triggers on uncaught errors (none currently). The share buttons use `window.open` popups — most browsers allow these from a user click, which is the case here.
 - Next-phase priorities (for round 9): add Next.js blur placeholders for the local images, add a dedicated `/sitemap` HTML site-index page, add a reading-time estimate badge to the blog hero, add a "back to top" within the blog TOC, add structured BreadcrumbList JSON-LD to blog + category pages, add a cookie preferences re-open button in the footer, and consider a `/team` or `/careers` page.
+
+---
+Task ID: 9
+Agent: main (Z.ai Code) — recurring webDevReview round 9
+Task: QA the existing site, then add more features & styling (mandatory). Focus: cookie preferences re-open button, BreadcrumbList JSON-LD, HTML site-index page, back-to-top in blog TOC.
+
+Work Log:
+- Read worklog.md (rounds 1–8) and confirmed the site was stable: all 16 tested routes 200 (1 intentional 404), lint clean, no console errors, mobile 390px no overflow.
+- QA via agent-browser at round start: re-confirmed all routes 200, zero console errors, mobile 390px scrollWidth === 390. No bugs to fix — proceeded to new feature work.
+- **Added a "Cookie preferences" re-open button** in the footer:
+  - Updated `CookieConsent` to export a `COOKIE_REOPEN_EVENT` constant and listen for that custom event to re-open the banner (without a page reload). Also updated the banner's "privacy approach" link to point to `/privacy` (was `/about`).
+  - New `CookiePreferencesButton` client component (`src/components/site/CookiePreferencesButton.tsx`) that dispatches `COOKIE_REOPEN_EVENT` on click.
+  - Restructured the Footer bottom bar into a flex row with: Privacy Policy, FAQ, Site Index, Sitemap XML, Cookie preferences button, and the "Designed with ♥" line — all as small links.
+  - Verified: the "Cookie preferences" button appears in the footer; clicking it re-opens the cookie consent banner (confirmed via agent-browser).
+- **Added BreadcrumbList JSON-LD structured data** to blog detail + category pages:
+  - Blog detail: added a `BreadcrumbList` script (Home > Blog > [Category] > Article) alongside the existing Article JSON-LD. Now 3 JSON-LD scripts on the page (AgriculturalBusiness from layout + Article + BreadcrumbList). Also added a visible breadcrumb `<nav aria-label="Breadcrumb">` above the title in the blog hero (Home / Blog / [Category]).
+  - Category page: added a `BreadcrumbList` script (Home > Blog > [Category] Articles) and a visible breadcrumb nav (Home / Blog / [Category]) above the back link.
+  - Verified: both pages contain `"@type":"BreadcrumbList"` in the HTML.
+- **Added a dedicated `/site-map` HTML site-index page**:
+  - New `src/app/site-map/page.tsx` with a PageHero + sections for Pages (cards with icons + descriptions linking to all 11 main pages), Farming Activities (pills for all 12 activities), Products (pills for all 8 products), Blog Categories (pills linking to all 6 `/blog/category/[slug]` pages), All Blog Articles (fetched from Prisma, links to each post), and Gallery Categories.
+  - Originally created at `/sitemap` but hit a Next.js route conflict with `sitemap.ts` (metadata route) → renamed to `/site-map`. Restarted the dev server to clear the conflict.
+  - Added `/site-map` to `sitemap.ts` and to the footer bottom bar. The footer "Site Index" link points to `/site-map`; the "Sitemap XML" link points to `/sitemap.xml`.
+  - Verified via VLM: hero "Site Index", Pages cards, and the Farming Activities/Products/Blog Categories pill sections all render.
+- **Added a "Back to top" button** at the bottom of the blog TOC sidebar (`TableOfContents` component): a small link with an ArrowUp icon that smooth-scrolls to the top (respects reduced motion). Appears below the TOC items with a top divider.
+- Final QA: `bun run lint` clean; all 17 tested routes return correct status (200 for valid, 404 for invalid); cookie preferences button re-opens the banner; BreadcrumbList JSON-LD present on blog detail + category pages; /site-map renders all sections; blog TOC has a back-to-top button; mobile 390px scrollWidth === 390 on /site-map and blog detail; sitemap now has 23 URLs (added /site-map).
+
+Stage Summary:
+- Round 9 added 4 substantive features: (1) a cookie-preferences re-open button in the footer (event-driven, no reload) + restructured footer bottom bar with Privacy/FAQ/Site-Index/Sitemap-XML links; (2) BreadcrumbList JSON-LD on blog detail + category pages with visible breadcrumb navs; (3) a dedicated `/site-map` HTML site-index page (pages, activities, products, categories, all posts, gallery categories); (4) a "Back to top" button in the blog TOC sidebar. Resolved a Next.js route conflict (/sitemap page vs sitemap.ts metadata) by renaming to /site-map.
+- New artifacts: `src/components/site/CookiePreferencesButton.tsx`, `src/app/site-map/page.tsx`; updated `src/components/site/CookieConsent.tsx` (reopen event + /privacy link), `src/components/site/Footer.tsx` (bottom bar restructure + CookiePreferencesButton), `src/components/site/TableOfContents.tsx` (back-to-top + ArrowUp import), `src/app/blog/[slug]/page.tsx` (breadcrumb nav + BreadcrumbList JSON-LD), `src/app/blog/category/[cat]/page.tsx` (breadcrumb nav + BreadcrumbList JSON-LD), `src/app/sitemap.ts` (+/site-map).
+- Page count is now 12 top-level routes: `/`, `/about`, `/farming-activities`, `/products`, `/gallery`, `/blog`, `/distributor`, `/search`, `/privacy`, `/faq`, `/site-map`, `/admin` (plus dynamic `/blog/[slug]`, `/blog/category/[cat]`, `opengraph-image`, `not-found`, `error`, loading states). The original 5 required routes are unchanged and intact.
+- Unresolved / risks: none blocking. The dev server had to be restarted mid-round due to the /sitemap route conflict — the next reviewer should verify the dev server is up before testing.
+- Next-phase priorities (for round 10): add Next.js blur placeholders for the local images, add a reading-time estimate badge to the blog hero, add a `/team` or `/careers` page, add structured FAQPage JSON-LD to the /faq page, add a "popular tags" cloud to the search page, add a print-friendly stylesheet for the site-map, and consider an email-this-article button on blog detail.

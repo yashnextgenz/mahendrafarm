@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Leaf, Phone, Mail, MapPin, Facebook, Instagram, Youtube, MessageCircle, Send } from "lucide-react";
 import { NAV_LINKS, SITE, FOOTER_ACTIVITIES } from "@/data/site";
 import { NewsletterForm } from "./NewsletterForm";
+import { CookiePreferencesButton } from "./CookiePreferencesButton";
 
 export function Footer() {
   const year = new Date().getFullYear();
@@ -148,13 +149,29 @@ export function Footer() {
 
       {/* Bottom bar */}
       <div className="relative border-t border-white/10">
-        <div className="container-page flex flex-col items-center justify-between gap-2 py-5 text-center sm:flex-row sm:text-left">
+        <div className="container-page flex flex-col items-center justify-between gap-3 py-5 text-center sm:flex-row sm:text-left">
           <p className="text-xs text-cream/60">
             © {year} Mahindra Integrated Farm. All Rights Reserved.
           </p>
-          <p className="text-xs text-cream/60">
-            Designed with <span className="text-lightgreen">♥</span> for a Greener Tomorrow
-          </p>
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs">
+            <Link href="/privacy" className="text-cream/55 transition-colors hover:text-lightgreen">
+              Privacy Policy
+            </Link>
+            <Link href="/faq" className="text-cream/55 transition-colors hover:text-lightgreen">
+              FAQ
+            </Link>
+            <Link href="/site-map" className="text-cream/55 transition-colors hover:text-lightgreen">
+              Site Index
+            </Link>
+            <Link href="/sitemap.xml" className="text-cream/55 transition-colors hover:text-lightgreen">
+              Sitemap XML
+            </Link>
+            <CookiePreferencesButton />
+            <span className="text-cream/40">·</span>
+            <span className="text-cream/60">
+              Designed with <span className="text-lightgreen">♥</span> for a Greener Tomorrow
+            </span>
+          </div>
         </div>
       </div>
     </footer>

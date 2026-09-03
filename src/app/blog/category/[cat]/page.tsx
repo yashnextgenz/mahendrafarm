@@ -76,8 +76,28 @@ export default async function BlogCategoryPage({ params }: { params: Params }) {
     createdAt: p.createdAt,
   }));
 
+  // BreadcrumbList JSON-LD (Home > Blog > [Category])
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://mahindraintegratedfarm.example" },
+      { "@type": "ListItem", position: 2, name: "Blog", item: "https://mahindraintegratedfarm.example/blog" },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: `${category} Articles`,
+        item: `https://mahindraintegratedfarm.example/blog/category/${cat}`,
+      },
+    ],
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
       <PageHero
         eyebrow="Category"
         title={`${category} Articles`}
@@ -88,7 +108,14 @@ export default async function BlogCategoryPage({ params }: { params: Params }) {
       <section className="bg-cream py-20 sm:py-24" aria-label={`Articles in ${category}`}>
         <div className="container-page">
           {/* Breadcrumb + back link */}
-          <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+            <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-ink/50">
+              <Link href="/" className="transition-colors hover:text-forest">Home</Link>
+              <span aria-hidden>/</span>
+              <Link href="/blog" className="transition-colors hover:text-forest">Blog</Link>
+              <span aria-hidden>/</span>
+              <span className="font-semibold text-forest">{category}</span>
+            </nav>
             <Link
               href="/blog"
               className="inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-xs font-bold uppercase tracking-wide text-forest shadow-soft ring-1 ring-mediumgreen/20 transition-colors hover:bg-lightgreen"
@@ -96,11 +123,11 @@ export default async function BlogCategoryPage({ params }: { params: Params }) {
               <ArrowLeft className="h-3.5 w-3.5" />
               All Articles
             </Link>
-            <p className="text-sm text-ink/60">
-              <span className="font-semibold text-forest">{posts.length}</span> article
-              {posts.length !== 1 && "s"} in this category
-            </p>
           </div>
+          <p className="mb-8 text-sm text-ink/60">
+            <span className="font-semibold text-forest">{posts.length}</span> article
+            {posts.length !== 1 && "s"} in this category
+          </p>
 
           {posts.length === 0 ? (
             <div className="rounded-3xl bg-white p-12 text-center shadow-soft ring-1 ring-black/5">
