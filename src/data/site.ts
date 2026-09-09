@@ -30,13 +30,11 @@ export type NavItem = { label: string; href: string };
 export const NAV_LINKS: NavItem[] = [
   { label: "Home", href: "/" },
   { label: "About Us", href: "/about" },
-  { label: "Farming Activities", href: "/farming-activities" },
+
   { label: "Products", href: "/products" },
   { label: "Gallery", href: "/gallery" },
   { label: "Blog", href: "/blog" },
-  { label: "Distributor", href: "/distributor" },
-  { label: "FAQ", href: "/faq" },
-  { label: "Contact Us", href: "/gallery#contact" },
+
 ];
 
 export const FOOTER_ACTIVITIES = [

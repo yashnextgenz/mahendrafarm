@@ -36,7 +36,7 @@ export function SectionHeading({
             isDark ? "text-lightgreen" : "text-mediumgreen"
           )}
         >
-          <Leaf className="h-3.5 w-3.5" />
+   
           {eyebrow}
         </span>
       )}

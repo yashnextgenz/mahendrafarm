@@ -73,10 +73,7 @@ export default function AboutPage() {
                   className="object-cover"
                 />
               </div>
-              <div className="absolute -bottom-5 -right-3 hidden rounded-2xl bg-forest px-5 py-4 text-white shadow-float sm:block">
-                <p className="text-2xl font-extrabold">10+</p>
-                <p className="text-xs text-cream/80">Years of Natural Farming</p>
-              </div>
+         
             </div>
             <div className="order-1 lg:order-2">
               <SectionHeading
@@ -110,13 +107,7 @@ export default function AboutPage() {
       </section>
 
       {/* Stats */}
-      <section className="bg-cream py-16 sm:py-20" aria-label="Our impact in numbers">
-        <div className="container-page">
-          <Reveal>
-            <StatsSection stats={STATS} variant="card" />
-          </Reveal>
-        </div>
-      </section>
+  
 
       {/* Vision & Mission */}
       <section className="bg-white py-20 sm:py-24" aria-label="Vision and mission">
@@ -134,14 +125,7 @@ export default function AboutPage() {
                 producing wholesome food while restoring soil, supporting rural
                 livelihoods, and inspiring more farmers to grow responsibly.
               </p>
-              <div className="mt-6 flex items-center gap-3 rounded-2xl bg-lightgreen/60 px-5 py-4">
-                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-forest text-lightgreen">
-                  <Eye className="h-5 w-5" />
-                </span>
-                <p className="text-sm font-medium text-forest">
-                  Healthy soil, healthy food, healthy people.
-                </p>
-              </div>
+     
             </div>
             <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl shadow-soft">
               <Image
@@ -179,14 +163,7 @@ export default function AboutPage() {
                 network — while empowering local farmers with fair, sustainable
                 livelihoods.
               </p>
-              <div className="mt-6 flex items-center gap-3 rounded-2xl bg-lightgreen/60 px-5 py-4">
-                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-forest text-lightgreen">
-                  <Target className="h-5 w-5" />
-                </span>
-                <p className="text-sm font-medium text-forest">
-                  From our farm, straight to your table.
-                </p>
-              </div>
+           
             </div>
           </div>
         </div>
@@ -205,9 +182,7 @@ export default function AboutPage() {
               <Reveal as="article" key={title} delay={i * 90}
                 className="group h-full rounded-3xl bg-white p-6 shadow-soft ring-1 ring-black/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lift"
               >
-                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-lightgreen text-forest transition-colors group-hover:bg-forest group-hover:text-lightgreen">
-                  <Icon className="h-6 w-6" strokeWidth={2} />
-                </span>
+          
                 <h3 className="mt-5 text-lg font-bold text-forest">{title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-ink/70">{description}</p>
               </Reveal>
@@ -258,58 +233,9 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Sustainability + Quality */}
-      <section className="bg-forest py-20 sm:py-24 text-white" aria-label="Sustainability and quality">
-        <div className="container-page grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.22em] text-lightgreen ring-1 ring-white/15">
-              <Recycle className="h-3.5 w-3.5" />
-              Sustainability
-            </span>
-            <h3 className="mt-4 text-2xl font-extrabold sm:text-3xl">Farming that gives back to the land</h3>
-            <p className="mt-4 text-cream/80">
-              We compost farm waste, reuse water, plant trees alongside crops, and
-              avoid synthetic chemicals — so the soil we farm on today stays fertile
-              for the generations of tomorrow.
-            </p>
-          </div>
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.22em] text-lightgreen ring-1 ring-white/15">
-              <BadgeCheck className="h-3.5 w-3.5" />
-              Quality &amp; Trust
-            </span>
-            <h3 className="mt-4 text-2xl font-extrabold sm:text-3xl">Freshness you can rely on</h3>
-            <p className="mt-4 text-cream/80">
-              Every harvest is checked for freshness, packed hygienically, and moved
-              quickly through our distributor network — so what reaches you is as
-              close to farm-fresh as it can be.
-            </p>
-          </div>
-        </div>
-      </section>
+    
 
-      {/* CTA */}
-      <section className="bg-cream py-16 sm:py-20" aria-label="Let's grow together">
-        <div className="container-page">
-          <div className="relative overflow-hidden rounded-3xl bg-lightgreen px-6 py-12 text-center shadow-soft ring-1 ring-mediumgreen/15 sm:px-12">
-            <h2 className="text-3xl font-extrabold uppercase tracking-tight text-forest sm:text-4xl">
-              Let&apos;s Grow Together
-            </h2>
-            <p className="mx-auto mt-3 max-w-xl text-base text-ink/75">
-              Whether you want fresh produce, a reliable supply partner, or to become
-              a distributor — we&apos;d love to hear from you.
-            </p>
-            <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Button href="/gallery#contact" variant="primary" size="lg" withArrow>
-                Get In Touch
-              </Button>
-              <Button href="/products" variant="outline" size="lg">
-                View Our Products
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
+  
     </>
   );
 }
