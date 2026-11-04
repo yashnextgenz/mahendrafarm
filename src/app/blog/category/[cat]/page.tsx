@@ -117,7 +117,7 @@ export default async function BlogCategoryPage({ params }: { params: Params }) {
           </p>
 
           {posts.length === 0 ? (
-            <div className="rounded-3xl bg-white p-12 text-center shadow-soft ring-1 ring-black/5">
+            <div className="rounded-3xl bg-white px-6 py-10 text-center sm:p-12 shadow-soft ring-1 ring-black/5">
               <Leaf className="mx-auto h-10 w-10 text-ink/30" />
               <p className="mt-3 text-lg font-semibold text-forest">
                 No articles in this category yet.

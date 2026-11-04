@@ -55,7 +55,7 @@ export function ProductsExplorer() {
       </div>
 
       {filtered.length === 0 && (
-        <div className="mt-12 rounded-3xl bg-cream p-12 text-center ring-1 ring-black/5">
+        <div className="mt-12 rounded-3xl bg-cream px-6 py-10 text-center sm:p-12 ring-1 ring-black/5">
           <p className="text-lg font-semibold text-forest">No products in this category yet.</p>
           <p className="mt-1 text-sm text-ink/60">Please check back soon or contact us directly.</p>
         </div>

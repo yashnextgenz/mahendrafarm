@@ -47,7 +47,7 @@ export function PageHero({
         )}
       >
       
-        <h1 className="mt-5 max-w-3xl text-balance text-4xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-5xl lg:text-6xl">
+        <h1 className="mt-5 max-w-3xl text-balance text-3xl font-extrabold min-[400px]:text-4xl leading-[1.1] tracking-tight text-white sm:text-5xl lg:text-6xl">
           {title}
         </h1>
         {subtitle && (

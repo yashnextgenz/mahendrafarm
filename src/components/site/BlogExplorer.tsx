@@ -148,7 +148,7 @@ export function BlogExplorer({ posts }: { posts: Post[] }) {
           ))}
         </div>
       ) : (
-        <div className="mt-10 rounded-3xl bg-cream p-12 text-center ring-1 ring-black/5">
+        <div className="mt-10 rounded-3xl bg-cream px-6 py-10 text-center sm:p-12 ring-1 ring-black/5">
           <p className="text-lg font-semibold text-forest">No articles found</p>
           <p className="mt-1 text-sm text-ink/60">
             Try a different search term or category.

@@ -126,7 +126,7 @@ export default function FAQPage() {
                 get back to you — usually within a day.
               </p>
               <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                <Button href="/gallery#contact" variant="primary" size="lg" withArrow>
+                <Button href="/contact" variant="primary" size="lg" withArrow>
                   Contact Us
                 </Button>
                 <Button href="/distributor" variant="outline" size="lg">

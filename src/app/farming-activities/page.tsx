@@ -59,7 +59,7 @@ export default function FarmingActivitiesPage() {
                     {act.description}
                   </p>
                   <a
-                    href="/gallery#contact"
+                    href="/contact"
                     className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold uppercase tracking-wide text-mediumgreen transition-colors hover:text-forest"
                   >
                     Learn More

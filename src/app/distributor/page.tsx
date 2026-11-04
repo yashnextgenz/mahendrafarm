@@ -259,10 +259,10 @@ export default function DistributorPage() {
                 detail honestly — no pressure, no hidden terms.
               </p>
               <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                <Button href="/gallery#contact" variant="primary" size="lg" withArrow>
+                <Button href="/contact" variant="primary" size="lg" withArrow>
                   Become A Distributor
                 </Button>
-                <Button href="/gallery#contact" variant="outline" size="lg">
+                <Button href="/contact" variant="outline" size="lg">
                   Talk To Us
                 </Button>
               </div>

@@ -43,6 +43,7 @@ type ButtonAsButton = CommonProps & {
   href?: undefined;
   onClick?: () => void;
   type?: "button" | "submit" | "reset";
+  disabled?: boolean;
 };
 
 export function Button({
@@ -54,6 +55,7 @@ export function Button({
   className,
   children,
   withArrow = false,
+  ...rest
 }: ButtonAsLink | ButtonAsButton) {
   const classes = cn(base, variants[variant], sizes[size], className);
 
@@ -72,7 +74,12 @@ export function Button({
     );
   }
   return (
-    <button type={type} onClick={onClick} className={classes}>
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={"disabled" in rest ? rest.disabled : undefined}
+      className={cn(classes, "disabled:cursor-not-allowed disabled:opacity-70")}
+    >
       {content}
     </button>
   );

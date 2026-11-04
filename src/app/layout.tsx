@@ -41,6 +41,14 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Mahindra Integrated Farm" }],
   manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/icon.png", type: "image/png", sizes: "64x64" },
+      { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/icon-512.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180" }],
+  },
   openGraph: {
     title: "Mahindra Integrated Farm | Natural Farming, Better Living",
     description:
@@ -68,6 +76,7 @@ const jsonLd = {
   email: SITE.email,
   url: "https://mahindraintegratedfarm.example",
   image: "https://mahindraintegratedfarm.example/images/hero.jpg",
+  logo: "https://mahindraintegratedfarm.example/logo.jpeg",
   address: {
     "@type": "PostalAddress",
     streetAddress:

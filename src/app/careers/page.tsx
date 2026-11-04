@@ -159,7 +159,7 @@ export default function CareersPage() {
                 Send us a note and tell us how you&apos;d like to contribute.
               </p>
               <div className="mt-5 flex justify-center">
-                <Button href="/gallery#contact" variant="light" size="md" withArrow>
+                <Button href="/contact" variant="light" size="md" withArrow>
                   Reach Out
                 </Button>
               </div>

@@ -25,16 +25,14 @@ export const SITE = {
   },
 } as const;
 
-export type NavItem = { label: string; href: string };
+export type NavItem = { label: string; href: string; children?: NavItem[] };
 
 export const NAV_LINKS: NavItem[] = [
   { label: "Home", href: "/" },
   { label: "About Us", href: "/about" },
-
   { label: "Products", href: "/products" },
   { label: "Gallery", href: "/gallery" },
-  { label: "Blog", href: "/blog" },
-
+  { label: "Contact Us", href: "/contact" },
 ];
 
 export const FOOTER_ACTIVITIES = [

@@ -68,12 +68,12 @@ export function CookieConsent() {
       aria-label="Cookie consent"
       aria-live="polite"
       className={cn(
-        "fixed inset-x-3 bottom-3 z-[70] mx-auto max-w-2xl rounded-3xl bg-white p-4 shadow-lift ring-1 ring-black/10 sm:inset-x-4 sm:bottom-4 sm:p-5",
+        "fixed inset-x-3 bottom-3 z-[70] mx-auto max-w-2xl rounded-2xl bg-white p-3 shadow-lift sm:rounded-3xl ring-1 ring-black/10 sm:inset-x-4 sm:bottom-4 sm:p-5",
         "animate-[fadeInUp_0.4s_ease-out]"
       )}
     >
       <div className="flex items-start gap-3 sm:gap-4">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-lightgreen text-forest sm:h-11 sm:w-11">
+        <span className="hidden h-10 w-10 shrink-0 sm:flex items-center justify-center rounded-full bg-lightgreen text-forest sm:h-11 sm:w-11">
           <Cookie className="h-5 w-5" strokeWidth={2} />
         </span>
         <div className="flex-1">
@@ -81,14 +81,14 @@ export function CookieConsent() {
             We use cookies to improve your experience
           </p>
           <p className="mt-1 text-xs leading-relaxed text-ink/60">
-            We use essential cookies to run this site and optional analytics to understand
-            what content you enjoy. You can choose what to allow. See our{" "}
+            <span className="hidden sm:inline">We use essential cookies to run this site and optional analytics to understand
+            what content you enjoy. You can choose what to allow. </span>See our{" "}
             <a href="/privacy" className="font-semibold text-mediumgreen underline-offset-2 hover:underline">
               privacy policy
             </a>{" "}
             for details.
           </p>
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="mt-2 flex flex-wrap gap-2 sm:mt-3">
             <button
               type="button"
               onClick={() => decide("accepted")}

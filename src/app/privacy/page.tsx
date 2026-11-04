@@ -134,7 +134,7 @@ export default function PrivacyPage() {
                 We&apos;re happy to explain anything in this policy or help with a data request.
               </p>
               <div className="mt-5 flex justify-center">
-                <Button href="/gallery#contact" variant="light" size="lg" withArrow>
+                <Button href="/contact" variant="light" size="lg" withArrow>
                   Get In Touch
                 </Button>
               </div>

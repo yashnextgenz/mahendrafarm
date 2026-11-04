@@ -23,7 +23,7 @@ export default function NotFound() {
         <span className="inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-forest text-lightgreen shadow-float">
           <Leaf className="h-8 w-8" strokeWidth={2} />
         </span>
-        <p className="mt-8 text-7xl font-extrabold tracking-tight text-forest sm:text-8xl">
+        <p className="mt-8 text-6xl font-extrabold tracking-tight text-forest sm:text-8xl">
           404
         </p>
         <span className="mt-3 h-1 w-16 rounded-full bg-mediumgreen" />

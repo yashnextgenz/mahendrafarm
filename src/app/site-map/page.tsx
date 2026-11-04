@@ -22,6 +22,7 @@ import {
   Search as SearchIcon,
   HelpCircle,
   ShieldCheck,
+  Mail,
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -35,7 +36,8 @@ const MAIN_PAGES = [
   { href: "/about", label: "About Us", Icon: Info, desc: "Who we are, our vision, mission, values and integrated farming approach." },
   { href: "/farming-activities", label: "Farming Activities", Icon: Sprout, desc: "All 12 farming activities — dairy, poultry, goat, fish, mushroom, plantations and more." },
   { href: "/products", label: "Products", Icon: Package, desc: "Browse our farm-fresh products by category — vegetables, dairy, poultry, pulses, fruits." },
-  { href: "/gallery", label: "Gallery", Icon: ImageIcon, desc: "Photo gallery, distributor network information and contact form." },
+  { href: "/gallery", label: "Gallery", Icon: ImageIcon, desc: "Photo gallery and distributor network information." },
+  { href: "/contact", label: "Contact Us", Icon: Mail, desc: "Send us an enquiry or find our phone, email and address." },
   { href: "/blog", label: "Blog", Icon: Newspaper, desc: "Stories, guides and insights on natural farming and seasonal produce." },
   { href: "/distributor", label: "Distributor", Icon: Network, desc: "Become a distributor — benefits, starter kit, process, regions and FAQ." },
   { href: "/careers", label: "Careers", Icon: Package, desc: "Open positions and how to join the Mahindra Integrated Farm team." },

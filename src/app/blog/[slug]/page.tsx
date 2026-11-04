@@ -262,7 +262,7 @@ export default async function BlogDetailPage({ params }: { params: Params }) {
                     All Articles
                   </Button>
                   <PrintButton />
-                  <Button href="/gallery#contact" variant="primary" size="md" withArrow>
+                  <Button href="/contact" variant="primary" size="md" withArrow>
                     Talk To Us
                   </Button>
                 </div>

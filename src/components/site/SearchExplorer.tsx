@@ -205,7 +205,7 @@ export function SearchExplorer() {
 
       {/* Empty state */}
       {submitted && total === 0 && (
-        <div className="mt-8 rounded-3xl bg-cream p-10 text-center ring-1 ring-black/5">
+        <div className="mt-8 rounded-3xl bg-cream px-6 py-10 text-center sm:p-10 ring-1 ring-black/5">
           <Leaf className="mx-auto h-10 w-10 text-ink/30" />
           <p className="mt-3 text-lg font-semibold text-forest">No results found</p>
           <p className="mt-1 text-sm text-ink/60">

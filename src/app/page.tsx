@@ -52,7 +52,7 @@ export default function HomePage() {
              
                 Growing Naturally, Serving Honestly
               </span>
-              <h1 className="mt-5 text-4xl font-extrabold leading-[1.08] tracking-tight text-forest sm:text-5xl lg:text-6xl">
+              <h1 className="mt-5 text-3xl font-extrabold min-[400px]:text-4xl leading-[1.08] tracking-tight text-forest sm:text-5xl lg:text-6xl">
                 SUSTAINABLE FARMS
                 <span className="block text-mediumgreen">FOR A BETTER FUTURE</span>
               </h1>
@@ -65,7 +65,7 @@ export default function HomePage() {
                 <Button href="/farming-activities" size="lg" withArrow>
                   Explore Our Farms
                 </Button>
-                <Button href="/gallery#contact" variant="outline" size="lg">
+                <Button href="/contact" variant="outline" size="lg">
                   <Phone className="h-4 w-4" />
                   Contact Us
                 </Button>
