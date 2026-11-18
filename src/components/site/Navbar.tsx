@@ -79,10 +79,10 @@ export function Navbar() {
         {/* LOGO */}
         <Link href="/" className="flex shrink-0 items-center" aria-label="Mahindra Integrated Farm - Home">
           <Image
-            src="/logo-full.png"
+            src="/logo-l1.png"
             alt="Mahindra Integrated Farm"
-            width={1545}
-            height={460}
+            width={1512}
+            height={427}
             priority
             className="h-11 w-auto sm:h-12 xl:h-14"
           />
